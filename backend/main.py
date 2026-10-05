@@ -86,7 +86,7 @@ def create_app(database_url=None):
         request.state.session_id = hashlib.sha256(token.encode()).hexdigest()
         if request.method in ("POST", "DELETE", "PUT", "PATCH"):
             origin = request.headers.get("origin")
-            expected = os.getenv("PUBLIC_ORIGIN", str(request.base_url).rstrip("/"))
+            expected = os.getenv("PUBLIC_ORIGIN") or os.getenv("RENDER_EXTERNAL_URL") or str(request.base_url).rstrip("/")
             if (origin and origin.rstrip("/") != expected.rstrip("/")) or request.headers.get("sec-fetch-site") == "cross-site":
                 return JSONResponse({"detail": "Cross-origin requests are forbidden"}, status_code=403)
             now = time.monotonic()
@@ -116,7 +116,12 @@ def create_app(database_url=None):
     def health():
         with db.connection() as conn:
             conn.execute("SELECT 1")
-        return {"status": "ok", "model": "synthetic-char-tfidf-lr-v1", "storage": "postgresql" if db.postgres else "sqlite"}
+        on_render = os.getenv("RENDER", "").lower() == "true"
+        return {"status": "ok", "model": "synthetic-char-tfidf-lr-v1",
+                "storage": "postgresql" if db.postgres else "sqlite",
+                "database_configured": db.configured,
+                "history_persistence": "external_database" if db.postgres else "ephemeral" if on_render else "local_file",
+                "deployment": {"commit": os.getenv("RENDER_GIT_COMMIT"), "instance": os.getenv("RENDER_INSTANCE_ID")}}
 
     @app.post("/api/analyze")
     def check(payload: AnalysisInput, request: Request):

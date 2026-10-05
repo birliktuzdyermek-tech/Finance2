@@ -7,8 +7,12 @@ from pathlib import Path
 
 class Database:
     def __init__(self, url=None):
-        self.url = url or os.getenv("DATABASE_URL", "sqlite:///data/qalqan.db")
+        configured = os.getenv("DATABASE_URL", "").strip()
+        self.url = url.strip() if url is not None else configured or "sqlite:///data/qalqan.db"
+        self.configured = bool(configured) or url is not None
         self.postgres = self.url.startswith(("postgres://", "postgresql://"))
+        if os.getenv("REQUIRE_POSTGRES", "false").lower() == "true" and not self.postgres:
+            raise ValueError("PostgreSQL is required. Set DATABASE_URL to the Internal Database URL in Render Environment.")
         if not self.postgres:
             if not self.url.startswith("sqlite:///"):
                 raise ValueError("DATABASE_URL must be PostgreSQL or sqlite:///")
@@ -19,7 +23,7 @@ class Database:
     def connection(self):
         if self.postgres:
             import psycopg
-            conn = psycopg.connect(self.url)
+            conn = psycopg.connect(self.url, connect_timeout=10)
         else:
             conn = sqlite3.connect(self.path, timeout=10)
         try:

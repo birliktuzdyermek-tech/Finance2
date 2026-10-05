@@ -13,7 +13,7 @@ curl -b /tmp/qalqan-cookies.txt http://localhost:8000/api/history
 
 | Метод | Путь | Результат |
 |---|---|---|
-| GET | `/api/health` | статус БД, версия модели, backend хранения |
+| GET | `/api/health` | статус БД, версия модели, backend хранения, наличие настройки БД, устойчивость истории и версия deployment |
 | POST | `/api/analyze` | `id, score, verdict, rules_score, ml_score, signals, urls, advice, duration_ms, limitations` |
 | GET | `/api/history` | `{items: [...]}` текущей сессии |
 | DELETE | `/api/history` | 204, удалены результаты текущей сессии |
@@ -24,3 +24,5 @@ curl -b /tmp/qalqan-cookies.txt http://localhost:8000/api/history
 `channel` ∈ `sms, whatsapp, email, url`; `content` — 3–10 000 символов после strip. `verdict` ∈ `low, suspicious, high`. Для URL-only `ml_score` = null. ML-оценка округлена до 0–100 и не является калиброванной вероятностью. `score` — гибридный индекс риска, `rules_score` — capped сумма весов правил.
 
 Ошибки: 422 — неправильное тело/канал/длина; 413 — тело больше 64 KiB; 403 — чужой origin; 429 — больше RATE_LIMIT изменяющих запросов за минуту на peer IP; 404 — недоступный отчёт. API-ответы имеют `Cache-Control: no-store`. Лимитер рассчитан на один процесс, не на распределённую промышленную защиту.
+
+В health нет строк подключения и секретов. `history_persistence`: `external_database` для подключённой PostgreSQL; `ephemeral` для SQLite в Render; `local_file` для локального SQLite. `database_configured` сообщает только наличие непустой настройки. В `deployment` используются публичные Render commit/instance IDs для проверки после обновления.

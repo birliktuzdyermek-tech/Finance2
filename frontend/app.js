@@ -92,4 +92,12 @@ $('#clear-history').addEventListener('click',async()=>{
   try{await api('history',{method:'DELETE'});historyItems=[];renderHistory();$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';toast('История удалена.');}catch(e){toast(e.message);}
 });
 window.addEventListener('hashchange',route);
-(async()=>{try{await api('health');$('#connection-status').textContent='API подключён';}catch(_){$('#connection-status').textContent='API недоступен';toast('Сервер недоступен. Обновите страницу после его запуска.');}await route();})();
+(async()=>{
+  try{
+    const health=await api('health');$('#connection-status').textContent='API подключён';
+    if(health.history_persistence==='ephemeral'){
+      $('#history-retention').textContent='До 200 результатов в личной сессии. История в демо временная и может исчезнуть при перезапуске сервиса. Сохраните нужные PDF-отчёты.';
+    }
+  }catch(_){$('#connection-status').textContent='API недоступен';toast('Сервер недоступен. Обновите страницу после его запуска.');}
+  await route();
+})();

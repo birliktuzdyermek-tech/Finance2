@@ -18,6 +18,8 @@ def main():
         page.on("pageerror", lambda error: console_errors.append(str(error)))
         page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000"), wait_until="networkidle")
         expect(page.locator("#connection-status")).to_have_text("API подключён")
+        if os.getenv("EXPECT_EPHEMERAL_HISTORY") == "true":
+            expect(page.locator("#history-retention")).to_contain_text("История в демо временная")
         page.screenshot(path=str(OUTPUT / "desktop-analyzer.png"), full_page=True)
         for sample, verdict in (("phishing", "Высокий риск"), ("safe", "Низкий риск"), ("url", "Подозрительно")):
             page.locator(f'[data-sample="{sample}"]').click()

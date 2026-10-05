@@ -14,8 +14,17 @@ def main():
         assert len(client.get("/api/history").json()["items"]) == 1
         assert client.get("/api/dashboard").json()["total"] == 1
         assert client.get(f"/api/reports/{result.json()['id']}.pdf").content.startswith(b"%PDF")
-        assert client.delete("/api/history").status_code == 204
-    print("PostgreSQL integration passed")
+        token = client.cookies.get("qalqan_session")
+        saved_id = result.json()["id"]
+    # A newly created application shares no process-local session state.
+    with TestClient(create_app(url)) as restarted:
+        restarted.cookies.set("qalqan_session", token)
+        assert restarted.get("/api/health").json()["history_persistence"] == "external_database"
+        items = restarted.get("/api/history").json()["items"]
+        assert len(items) == 1 and items[0]["id"] == saved_id
+        assert restarted.get(f"/api/reports/{saved_id}.pdf").content.startswith(b"%PDF")
+        assert restarted.delete("/api/history").status_code == 204
+    print("PostgreSQL integration passed, including history/PDF after application recreation")
 
 
 if __name__ == "__main__":
