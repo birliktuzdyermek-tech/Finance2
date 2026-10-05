@@ -1,13 +1,15 @@
 # Проверки выполненной реализации
 
-- 20 unittest-проверок прошли: анализ, API, session isolation, PDF, приватность БД, validation, body limit, origin/cookie headers, rate limit, обязательная PostgreSQL, диагностика временного хранилища и сценарии проверки истории после деплоя.
-- Playwright / Chromium: все 6 разделов, прямая ссылка `/#demo`, отсутствие автоматических проверок при открытии, ровно один API-анализ на каждый из трёх сценариев, dashboard = 3 выполненные проверки, фильтр истории, PDF-download, чужой report 404, анализатор и демо на экране 390px без горизонтального переполнения; нет page errors.
+- 37 unittest-проверок: анализ/API, session isolation, PDF, privacy, validation, shared atomic quota, batch rollback, expiry, dual OTP/attempts/session binding, provider failure, account deletion/logout, feedback consent, бренды и bootstrap. Итоговая проверка выполняется перед публикацией.
+- Playwright / Chromium: demo, пакет, фильтры, CSV, сравнение, 5 ablation-строк/CI/probes, недоступность ненастроенной доставки, согласие на feedback, PDF/session isolation и мобильное меню. Отдельный mobile-auth browser выполняет настоящий signup/verify/logout с mock только отправки; реальные SMS/email не отправлялись.
 - Синтетический evaluation выполнен. Классификационные результаты и hash находятся в `ai/evaluation/metrics.json`; latency зависит от среды.
 - Docker build завершился успешно. Образ запускается непривилегированным пользователем.
-- Реальная PostgreSQL 16 в Docker: health, analyze, история, dashboard, PDF и очистка прошли через `tests.postgres_smoke`. Пересоздание приложения с прежней сессией сохранило историю и доступ к PDF.
+- PostgreSQL 16: история/PDF после пересоздания, pool reuse, 24 конкурентных резерва из двух экземпляров — ровно 7 допущенных при лимите 7; SQL-сценарий регистрации/подтверждения/удаления с mock доставки.
 - Render Blueprint проверен по официальной JSON Schema (`https://render.com/schema/render.yaml.json`). Финальная конфигурация проверяется повторно перед публикацией.
 - Резюме RU/EN и one-pager экспортированы в PDF: каждый документ — 1 страница. PowerPoint — 12 редактируемых слайдов, заметки выступающего включены.
 
 Скриншоты и экспортированные материалы находятся в `artifacts/` после выполнения browser smoke / presentation build. CI содержит API, evaluation, PostgreSQL smoke и Docker build. Результат GitHub CI и публичного Render deployment фиксируется отдельно после загрузки кода.
 
 Эти проверки подтверждают работоспособность прототипа, а не точность на реальном банковском трафике или готовность к production.
+
+Локальная нагрузка: 40 запросов при concurrency 8, 40/40 HTTP 200; warm API p95 317 мс в одной managed-среде с SQLite, включая создание клиента и БД. Это не SLA Render или доказательство линейного роста нагрузки. Данные — `artifacts/load-smoke.json`.

@@ -26,6 +26,7 @@ def make_pdf(result):
     p("Отчёт об анализе финансового фишинга", "Heading2")
     p(f"ID: {result['id']} | UTC: {result['created_at']}")
     p(f"Риск-балл: {result['score']}/100 | Вердикт: {result['verdict']}")
+    p('Предполагаемая схема: '+result.get('scheme',{}).get('title','Тип схемы не определён'))
     p(f"Правила: {result['rules_score']} | ML: {result['ml_score'] if result['ml_score'] is not None else 'не применяется'}")
     p("Найденные признаки", "Heading2")
     for signal in result["signals"]:
@@ -33,7 +34,7 @@ def make_pdf(result):
     if not result["signals"]:
         p("Эвристические признаки не обнаружены. ML-оценка показывается отдельно.")
     for url in result["urls"]:
-        p(f"Домен: {url['host']}; в справочнике банков: {'да' if url['official'] else 'нет'}")
+        p(f"Домен: {url['host']}; в демонстрационном справочнике: {'да' if url['official'] else 'нет'}")
     p(result["advice"])
     p("Ограничения прототипа", "Heading2")
     for item in result["limitations"]:

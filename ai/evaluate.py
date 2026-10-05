@@ -9,6 +9,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_sco
 
 from ai.model import DATASET, ROOT, rows, train
 from backend.analyzer import analyze
+from ai.benchmark import ablation_scores, bootstrap
 
 
 def metrics(labels, scores, threshold):
@@ -38,6 +39,8 @@ def main():
         result = analyze(row["text"], model=model)
         elapsed.append((perf_counter() - start) * 1000)
         results.append(result)
+    scores=ablation_scores(results)
+    scores['ml']=ml_scores
     output = {
         "status": "evaluated", "created_at": datetime.now(timezone.utc).isoformat(),
         "dataset": "authored_synthetic", "dataset_sha256": hashlib.sha256(DATASET.read_bytes()).hexdigest(),
@@ -48,6 +51,10 @@ def main():
         "ml": metrics(labels, ml_scores, .5),
         "rules": metrics(labels, [r["rules_score"] / 100 for r in results], .35),
         "hybrid": metrics(labels, [r["score"] / 100 for r in results], .35),
+        "text_rules":metrics(labels,scores['text_rules'],.35),
+        "url_rules":metrics(labels,scores['url_rules'],.35),
+        "bootstrap":bootstrap(labels,[r['group'] for r in test],scores),
+        "rules_version":"financial-rules-v2",
         "latency_ms": {"median": round(float(np.median(elapsed)), 3), "p95": round(float(np.percentile(elapsed, 95)), 3), "scope": "warm in-process inference, excludes HTTP/database"},
         "limitations": "Small synthetic benchmark. Variants within test groups are correlated. Scores do not estimate real-world performance or calibrated fraud probability. No threshold tuning on test. Test has been used during prototype development; obtain a new external blind test before claiming generalization.",
     }

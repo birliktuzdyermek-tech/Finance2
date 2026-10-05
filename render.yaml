@@ -26,6 +26,8 @@ services:
         value: "true"
       - key: RATE_LIMIT
         value: "30"
+      - key: AUTH_SECRET
+        generateValue: true
 databases:
   - name: qalqan-finance2-db
     databaseName: qalqan_finance2_db

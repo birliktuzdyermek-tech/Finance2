@@ -32,6 +32,8 @@
 
 Прокси и CA в managed cloud: Dockerfile принимает optional BuildKit secret `proxy_ca`; `docker build --secret id=proxy_ca,src=/etc/ssl/certs/ca-certificates.crt -t qalqan .`. Сохраняйте конфигурацию proxy и TLS verification. В обычном Render этот секрет не требуется. Не добавляйте session CA в репозиторий.
 
-Не увеличивайте `numInstances` и `--workers` до замены in-memory limiter. В Render peer IP может быть адресом proxy, поэтому лимит может быть общим для пользователей. Для нагрузочного пилота нужно настроить доверенный forwarding и общий limiter; произвольно доверять X-Forwarded-For нельзя.
+Общий SQL limiter и PostgreSQL connection pool реализованы. Перед увеличением `numInstances`/`--workers` подключите одну PostgreSQL, задайте одинаковый AUTH_SECRET всем репликам, проверьте допустимое число соединений (до 5 на процесс), trust proxy и нагрузку. В Render peer может быть адресом proxy, поэтому лимит бывает общим для пользователей; произвольно доверять X-Forwarded-For нельзя. Сервис сейчас остаётся одной бесплатной репликой.
+
+Телефон/email-регистрация: [настройка Twilio + Resend](auth-setup.md). Реальная доставка требует собственных ключей и sender identity. На Render с SQLite регистрация недоступна, даже если ключи заданы.
 
 До банковского пилота: аккаунты/SSO, роли, аудит без исходных сообщений, централизованный limiter, backup/restore, pool БД, timed deletion, load tests, лицензированный источник репутации, dataset governance и независимая оценка.

@@ -1,0 +1,110 @@
+{
+  "dataset": "authored_robustness_probes",
+  "threshold": 35,
+  "cases": [
+    {
+      "id": "direct_secret",
+      "kind": "plain",
+      "expected": 1,
+      "score": 65,
+      "predicted": 1,
+      "correct": true,
+      "signals": [
+        "secret_request",
+        "urgency"
+      ]
+    },
+    {
+      "id": "spaced_secret",
+      "kind": "spaces",
+      "expected": 1,
+      "score": 30,
+      "predicted": 0,
+      "correct": false,
+      "signals": []
+    },
+    {
+      "id": "mixed_script",
+      "kind": "homoglyph_text",
+      "expected": 1,
+      "score": 65,
+      "predicted": 1,
+      "correct": true,
+      "signals": []
+    },
+    {
+      "id": "leetspeak",
+      "kind": "leetspeak_text",
+      "expected": 1,
+      "score": 31,
+      "predicted": 0,
+      "correct": false,
+      "signals": []
+    },
+    {
+      "id": "typo_domain",
+      "kind": "url_leetspeak",
+      "expected": 1,
+      "score": 45,
+      "predicted": 1,
+      "correct": true,
+      "signals": [
+        "impersonation"
+      ]
+    },
+    {
+      "id": "unicode_domain",
+      "kind": "url_homoglyph",
+      "expected": 1,
+      "score": 81,
+      "predicted": 1,
+      "correct": true,
+      "signals": [
+        "idn",
+        "impersonation",
+        "homoglyph"
+      ]
+    },
+    {
+      "id": "brand_subdomain",
+      "kind": "url_subdomain",
+      "expected": 1,
+      "score": 45,
+      "predicted": 1,
+      "correct": true,
+      "signals": [
+        "impersonation"
+      ]
+    },
+    {
+      "id": "trusted_reference",
+      "kind": "reference_domain",
+      "expected": 0,
+      "score": 0,
+      "predicted": 0,
+      "correct": true,
+      "signals": []
+    },
+    {
+      "id": "warning",
+      "kind": "negation",
+      "expected": 0,
+      "score": 23,
+      "predicted": 0,
+      "correct": true,
+      "signals": []
+    },
+    {
+      "id": "normal_notice",
+      "kind": "notification",
+      "expected": 0,
+      "score": 11,
+      "predicted": 0,
+      "correct": true,
+      "signals": []
+    }
+  ],
+  "passed": 8,
+  "total": 10,
+  "limitations": "These probes reveal failures and do not estimate real-world accuracy. No tuning on an independent test."
+}

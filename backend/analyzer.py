@@ -1,13 +1,36 @@
 """Offline hybrid risk analysis. URLs are parsed, never opened or resolved."""
 import ipaddress
 import re
-from difflib import SequenceMatcher
+import unicodedata
 from time import perf_counter
-from urllib.parse import urlsplit, unquote
+from urllib.parse import urlsplit
 
 from ai.model import predict
 
 OFFICIAL = {"kaspi.kz": "Kaspi", "halykbank.kz": "Halyk", "homebank.kz": "Homebank", "bcc.kz": "BCC", "forte.kz": "Forte"}
+OFFICIAL.update({"bankffin.kz":"Freedom", "jusan.kz":"Jusan", "egov.kz":"eGov", "post.kz":"Казпочта", "airastana.com":"Air Astana"})
+BRANDS = {"kaspi":"Kaspi", "halyk":"Halyk", "halykbank":"Halyk", "homebank":"Halyk", "bcc":"BCC", "forte":"Forte", "freedom":"Freedom", "bankffin":"Freedom", "jusan":"Jusan", "egov":"eGov", "kazpost":"Казпочта", "airastana":"Air Astana"}
+BRANDS['post']='Казпочта'
+CONFUSABLES = str.maketrans({'а':'a','е':'e','о':'o','р':'p','с':'c','у':'y','х':'x','к':'k','м':'m','т':'t','в':'b','н':'h','і':'i','қ':'k','α':'a','ο':'o','ρ':'p','ϲ':'c','κ':'k','0':'o','1':'i','3':'e','4':'a','5':'s','7':'t'})
+SCHEMES = [
+    ('family','Родственник в беде',r'сын|доч\w*|родствен\w*|мама.{0,40}(?:срочно|помоги)|son.{0,30}trouble|бала\w*.{0,30}көмек'),
+    ('delivery','Фальшивый курьер',r'курьер|посыл\w*|достав\w*|parcel|delivery|жеткіз\w*'),
+    ('prize','Выигрыш или приз',r'выигр\w*|приз\w*|розыгрыш|prize|reward|ұтып'),
+    ('investment','Фейковые инвестиции',r'инвест\w*|доход.{0,30}гарант|investment|guaranteed.{0,30}profit|инвестиция'),
+    ('government','Пособие или выплата',r'пособ\w*|субсид\w*|государствен\w*.{0,30}выплат|egov|жәрдемақы'),
+    ('job','Фальшивая работа',r'работ\w*|ваканси\w*|зарплат\w*|job offer|жұмыс'),
+    ('bank_support','Служба безопасности банка',r'банк\w*|сч[её]т|карт\w*|bank|account|card|шот|cvv'),
+]
+
+
+def levenshtein(a, b):
+    previous = list(range(len(b)+1))
+    for i, char in enumerate(a, 1):
+        current = [i]
+        for j, other in enumerate(b, 1):
+            current.append(min(current[-1]+1, previous[j]+1, previous[j-1]+(char!=other)))
+        previous = current
+    return previous[-1]
 SHORTENERS = {"bit.ly", "tinyurl.com", "t.co", "clck.ru", "cutt.ly"}
 URL_PATTERN = re.compile(r"(?:https?://|www\.)[^\s<>\"']+", re.I)
 TEXT_RULES = [
@@ -59,17 +82,28 @@ def inspect_url(raw):
     official = official_domain(host)
     if not official:
         labels = host.split(".")
-        looks_similar = any(
-            brand in unquote(host) or any(SequenceMatcher(None, brand, label).ratio() >= .78 for label in labels)
-            for brand in (d.split(".")[0] for d in OFFICIAL)
-        )
+        decoded = []
+        for label in labels:
+            try:
+                decoded.append(label.encode('ascii').decode('idna'))
+            except UnicodeError:
+                decoded.append(label)
+                if not any(s['code']=='malformed_url' for s in flags):
+                    add('malformed_url','Некорректное кодирование международного домена',25)
+        skeletons = [unicodedata.normalize('NFKC',label).casefold().translate(CONFUSABLES) for label in decoded]
+        matched = {name for brand,name in BRANDS.items() if any(brand in label or (len(brand)>=4 and levenshtein(brand,label)<=min(2,max(1,len(brand)//5))) for label in skeletons)}
+        looks_similar = bool(matched)
         if looks_similar:
-            add("impersonation", "Домен похож на банк, но отсутствует в справочнике", 45)
+            add("impersonation", "Домен похож на известный бренд, но отсутствует в справочнике", 45)
+            if any(label!=decoded[index].casefold() and any(ord(c)>127 for c in decoded[index]) for index,label in enumerate(skeletons)):
+                add('homoglyph','Похожие символы могут имитировать название бренда',18)
+    else:
+        matched = {OFFICIAL[official]}
     if len(raw) > 180:
         add("long_url", "Необычно длинная ссылка", 8)
     if len(host.split(".")) > 4:
         add("subdomains", "Много уровней поддоменов", 12)
-    return {"host": host, "official": bool(official), "signals": flags}
+    return {"host": host, "official": bool(official), "signals": flags, "brand_matches": sorted(matched)}
 
 
 def analyze(content, channel="sms", model=None):
@@ -99,12 +133,18 @@ def analyze(content, channel="sms", model=None):
     ml_risk = min(65, max(35, round(ml * 85))) if ml is not None and ml >= .5 else round((ml or 0) * 68)
     score = max(rules_score, ml_risk) if ml is not None else rules_score
     verdict = "high" if score >= 70 else "suspicious" if score >= 35 else "low"
+    scheme = {'code':'unknown','title':'Тип схемы не определён'}
+    if score>=35:
+        for code,title,pattern in SCHEMES:
+            if re.search(pattern,normalized,re.I):
+                scheme={'code':code,'title':title}
+                break
     advice = {
         "high": "Не вводите данные и не переводите деньги. Свяжитесь с банком через его официальное приложение или номер на карте.",
         "suspicious": "Проверьте отправителя и адрес через официальный канал банка. Не сообщайте коды, PIN и CVV.",
         "low": "Явных признаков высокого риска мало. Это не гарантия безопасности: проверьте отправителя и никогда не передавайте секретные данные.",
     }[verdict]
-    return {"score": score, "verdict": verdict, "rules_score": rules_score, "ml_score": ml_score,
+    return {"score": score, "verdict": verdict, "scheme":scheme, "rules_version":"financial-rules-v2", "rules_score": rules_score, "ml_score": ml_score,
             "signals": signals, "urls": urls, "advice": advice, "channel": channel,
             "duration_ms": round((perf_counter() - started) * 1000, 2),
             "model_version": "synthetic-char-tfidf-lr-v1",
