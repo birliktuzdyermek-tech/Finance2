@@ -1,7 +1,7 @@
 # Проверки выполненной реализации
 
-- 37 unittest-проверок: анализ/API, session isolation, PDF, privacy, validation, shared atomic quota, batch rollback, expiry, dual OTP/attempts/session binding, provider failure, account deletion/logout, feedback consent, бренды и bootstrap. Итоговая проверка выполняется перед публикацией.
-- Playwright / Chromium: demo, пакет, фильтры, CSV, сравнение, 5 ablation-строк/CI/probes, недоступность ненастроенной доставки, согласие на feedback, PDF/session isolation и мобильное меню. Отдельный mobile-auth browser выполняет настоящий signup/verify/logout с mock только отправки; реальные SMS/email не отправлялись.
+- 40 unittest-проверок: анализ/API, session isolation, PDF, privacy, validation, shared atomic quota, batch rollback, expiry, email OTP/attempts/session binding, legacy schema migration, Resend request, provider failure, account deletion/logout, feedback consent, бренды и bootstrap. Итоговая проверка выполняется перед публикацией.
+- Playwright / Chromium: demo, пакет, фильтры, CSV, сравнение, 5 ablation-строк/CI/probes, недоступность ненастроенной доставки, согласие на feedback, PDF/session isolation и мобильное меню. Отдельный mobile-auth browser выполняет настоящий signup/verify/logout с mock только отправки; реальные письма не отправлялись.
 - Синтетический evaluation выполнен. Классификационные результаты и hash находятся в `ai/evaluation/metrics.json`; latency зависит от среды.
 - Docker build завершился успешно. Образ запускается непривилегированным пользователем.
 - PostgreSQL 16: история/PDF после пересоздания, pool reuse, 24 конкурентных резерва из двух экземпляров — ровно 7 допущенных при лимите 7; SQL-сценарий регистрации/подтверждения/удаления с mock доставки.

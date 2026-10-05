@@ -46,18 +46,32 @@ def main():
     import hashlib
     from backend.auth import AuthService, RegistrationInput, VerificationInput
     from tests.test_auth import CONFIG
-    codes=[];identity=str(uuid4());email=identity+'@example.com';phone='+77'+str(int(uuid4().hex[:10],16)).zfill(11)[-9:]
-    with patch.dict(os.environ,{**CONFIG,'RENDER':'false'}),patch('backend.auth.deliver_codes',side_effect=lambda p,e,s,m:codes.append((s,m))):
+    codes=[];identity=str(uuid4());email=identity+'@example.com'
+    with patch.dict(os.environ,{**CONFIG,'RENDER':'false'}),patch('backend.auth.deliver_code',side_effect=lambda e,m:codes.append(m)):
         db=Database(url);db.init();auth=AuthService(db);auth.init()
         try:
             sid=hashlib.sha256(identity.encode()).hexdigest()
-            payload=RegistrationInput(email=email,phone=phone,consent=True)
+            payload=RegistrationInput(email=email,consent=True)
             challenge=auth.start(payload,sid,identity)
-            profile,token=auth.verify(VerificationInput(challenge_id=challenge['challenge_id'],sms_code=codes[-1][0],email_code=codes[-1][1]),sid)
+            profile,token=auth.verify(VerificationInput(challenge_id=challenge['challenge_id'],email_code=codes[-1]),sid)
             assert profile['authenticated']
             user=auth.user(hashlib.sha256(token.encode()).hexdigest());assert user and user['email']==email
             auth.delete_account(user)
             assert auth.user(hashlib.sha256(token.encode()).hexdigest()) is None
+            # Exercise the real PostgreSQL upgrade from the former phone schema.
+            with db.connection() as c:
+                c.execute('ALTER TABLE users ADD COLUMN phone TEXT UNIQUE')
+                db.execute(c,'INSERT INTO users (id,email,created_at,phone) VALUES (?,?,?,?)',(identity,email,1,'+77012345678'))
+                db.execute(c,'INSERT INTO auth_sessions VALUES (?,?,?)',('legacy-'+identity,identity,int(time.time())+600))
+                c.execute('DROP TABLE auth_challenges')
+                c.execute('CREATE TABLE auth_challenges (id TEXT PRIMARY KEY,session_id TEXT NOT NULL,email TEXT NOT NULL,phone TEXT NOT NULL,sms_hash TEXT NOT NULL,email_hash TEXT NOT NULL,expires_at BIGINT NOT NULL,attempts INTEGER NOT NULL DEFAULT 0)')
+            auth.init();auth.init()
+            legacy=auth.user('legacy-'+identity)
+            assert legacy=={'id':identity,'email':email}
+            with db.connection() as c:
+                for table in ('users','auth_challenges'):
+                    assert 'phone' not in auth._columns(c,table)
+            auth.delete_account(legacy)
         finally:db.close()
     print("PostgreSQL integration passed: restart history/PDF, pooled connections and atomic quota across instances")
 
