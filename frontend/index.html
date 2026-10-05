@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102f37">
+  <meta name="description" content="Qalqan — объяснимый анализ финансового фишинга в сообщениях и ссылках.">
+  <title>Qalqan — Finance Security</title>
+  <link rel="icon" href="/static/shield.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="#analyzer" class="brand"><img src="/static/shield.svg" alt="" width="40" height="40"><span>qalqan<span class="brand-sub">FINANCE SECURITY</span></span></a>
+    <div class="workspace"><span class="workspace-icon">Q</span><span>Конкурсный прототип<small>Cybersecurity + AI</small></span><span class="version">v0.1</span></div>
+    <span class="nav-label">РАБОЧЕЕ ПРОСТРАНСТВО</span>
+    <nav aria-label="Основное меню">
+      <a href="#dashboard" data-view="dashboard"><span class="nav-icon">▦</span>Обзор угроз</a>
+      <a href="#analyzer" data-view="analyzer"><span class="nav-icon">⌕</span>Анализатор<span class="nav-badge">AI</span></a>
+      <a href="#history" data-view="history"><span class="nav-icon">◷</span>История проверок</a>
+      <a href="#research" data-view="research"><span class="nav-icon">▤</span>Модель и метрики</a>
+      <a href="#settings" data-view="settings"><span class="nav-icon">⚙</span>О проекте</a>
+    </nav>
+    <div class="sidebar-note"><span class="little-shield">◇</span><strong>Проверяйте до клика</strong><p>Сообщение может выглядеть убедительно. Посмотрите, что стоит за ним.</p><a href="#analyzer">Проверить сообщение ↗</a></div>
+    <div class="sidebar-footer"><span class="avatar">Q</span><span>Личная сессия<small>Исходный текст не сохраняется</small></span></div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div><span class="breadcrumb">Рабочее пространство</span><span class="crumb-divider">/</span><span id="page-name">Анализатор</span></div><div class="topbar-right"><span class="status-dot"></span><span id="connection-status">Подключение…</span><span class="prototype-tag">MVP · 2026</span></div></header>
+    <main>
+      <section id="view-analyzer" class="view">
+        <div class="page-heading"><div><div class="eyebrow">ОБЪЯСНИМЫЙ АНАЛИЗ ФИШИНГА</div><h1>Доверяйте фактам.<br><span>Проверяйте сообщения.</span></h1><p>Найдите признаки финансового мошенничества<br class="desktop-break"> до того, как передадите данные или деньги.</p></div><div class="heading-mark"><img src="/static/shield.svg" alt="" width="95" height="95"><span>Ваш цифровой щит</span></div></div>
+        <div class="analyzer-grid">
+          <article class="card input-card"><div class="card-heading"><h2>Новая проверка</h2><span class="small-label">Текст + URL</span></div><p class="card-description">Вставьте сообщение или ссылку, которую хотите проверить.</p>
+            <form id="analysis-form">
+              <div class="channel-tabs" role="group" aria-label="Источник"><button type="button" data-channel="sms" class="selected" aria-pressed="true">SMS</button><button type="button" data-channel="whatsapp" aria-pressed="false">WhatsApp</button><button type="button" data-channel="email" aria-pressed="false">Email</button><button type="button" data-channel="url" aria-pressed="false">Ссылка</button></div>
+              <label for="content" id="content-label">Текст сообщения</label><div class="textarea-wrap"><textarea id="content" maxlength="10000" minlength="3" required placeholder="Например: «Ваш счёт будет заблокирован. Срочно подтвердите данные по ссылке…»"></textarea><div class="textarea-bottom"><span>Не вводите реальные пароли, PIN и коды</span><span id="char-count">0 / 10 000</span></div></div>
+              <div class="samples"><span>Попробуйте пример</span><button type="button" data-sample="phishing">Фишинг ↗</button><button type="button" data-sample="safe">Уведомление ↗</button><button type="button" data-sample="url">Подмена домена ↗</button></div>
+              <div id="form-error" class="form-error" role="alert" hidden></div><button id="analyze-button" class="primary-button" type="submit"><span>◇</span>Проверить на угрозы<span class="arrow">→</span></button>
+            </form><div class="privacy-note"><span>♧</span><p>Анализ выполняется на сервере. В истории остаются только результаты и домены, без исходного текста.</p></div>
+          </article>
+          <article class="card result-card" aria-live="polite"><div class="card-heading"><h2>Результат анализа</h2><span id="result-status" class="small-label">Ожидает проверки</span></div>
+            <div id="result-empty" class="result-empty"><div class="radar"><span>◇</span></div><h3>Сначала проверка — потом действие</h3><p>Здесь появятся оценка риска, найденные признаки и рекомендации.</p><div class="empty-checks"><span>✓ Анализ текста</span><span>✓ Проверка доменов</span><span>✓ Объяснение риска</span></div></div>
+            <div id="result-content" hidden><div class="risk-main"><div id="risk-circle" class="risk-circle"><strong id="risk-score">0</strong><span>из 100</span></div><div><span id="risk-verdict" class="pill"></span><h3 id="risk-title"></h3><p>Риск-балл, а не вероятность</p></div></div><div class="score-breakdown"><div><span>Правила</span><strong id="rules-score"></strong></div><div><span>ML-оценка</span><strong id="ml-score"></strong></div><div><span>Анализ</span><strong id="duration"></strong></div></div><h4>Почему такой результат</h4><div id="signals" class="signals"></div><div id="url-results"></div><div class="recommendation"><strong>Рекомендуемое действие</strong><p id="advice"></p></div><a id="download-report" class="secondary-button" href="#">↓ Скачать PDF-отчёт</a></div>
+          </article>
+        </div>
+        <div class="how-grid"><article><span class="step-number">01</span><h3>Разбираем сообщение</h3><p>Ищем запросы секретных данных, давление и финансовые приманки.</p></article><article><span class="step-number">02</span><h3>Проверяем адрес</h3><p>Выделяем настоящий домен и признаки подмены. Ссылки не открываем.</p></article><article><span class="step-number">03</span><h3>Объясняем риск</h3><p>Объединяем правила и ML-модель, показываем признаки и следующий шаг.</p></article></div>
+        <div class="limitation-banner"><span>ⓘ</span><p><strong>Исследовательский прототип.</strong> Модель обучена на синтетических данных RU / KZ / EN. Низкая оценка не гарантирует безопасность.</p><a href="#research">О методике ↗</a></div>
+      </section>
+      <section id="view-dashboard" class="view" hidden><div class="page-heading compact"><div><div class="eyebrow">ВАША СЕССИЯ</div><h1>Обзор угроз</h1><p>Статистика проверок, выполненных в этом браузере.</p></div><a class="primary-button compact-button" href="#analyzer">+ Новая проверка</a></div><div id="dashboard-stats" class="stats-grid"></div><div class="dashboard-grid"><article class="card"><h2>Проверки по дням</h2><div id="daily-chart" class="chart"></div></article><article class="card"><h2>Частые признаки</h2><div id="types-chart" class="chart"></div></article></div><article class="card dashboard-recent"><div class="card-heading"><h2>Последние проверки</h2><a href="#history">Вся история ↗</a></div><div id="recent-checks"></div></article></section>
+      <section id="view-history" class="view" hidden><div class="page-heading compact"><div><div class="eyebrow">РЕЗУЛЬТАТЫ И ОТЧЁТЫ</div><h1>История проверок</h1><p>До 200 результатов в личной сессии. Хранение — до 7 дней.</p></div><button id="clear-history" class="secondary-button" type="button">Удалить историю</button></div><div class="history-filters"><label for="history-filter">Уровень риска</label><select id="history-filter"><option value="all">Все проверки</option><option value="high">Высокий риск</option><option value="suspicious">Подозрительно</option><option value="low">Низкий риск</option></select></div><article class="card"><div id="history-list"></div></article></section>
+      <section id="view-research" class="view" hidden><div class="page-heading compact"><div><div class="eyebrow">ВОСПРОИЗВОДИМЫЙ ЭКСПЕРИМЕНТ</div><h1>Модель и метрики</h1><p>Измеренные результаты на синтетическом тестовом наборе.</p></div><span class="prototype-tag">Baseline v1</span></div><div class="limitation-banner research-warning"><span>ⓘ</span><p>Эти показатели описывают небольшой синтетический набор. Для банковского пилота нужен независимый тест на реальных обезличенных данных.</p></div><div id="research-metrics" class="stats-grid"></div><div class="dashboard-grid"><article class="card"><h2>Как устроена модель</h2><div class="method-flow"><span>Сообщение</span><b>↓</b><span>Character TF-IDF · 3–5 символов</span><b>↓</b><span>Logistic Regression · seed 42</span><b>↓</b><span>ML-оценка + правила → риск-балл</span></div><p class="card-description">ML-only сигнал ограничен уровнем «подозрительно». Высокий риск требует эвристических признаков. Оценки не калиброваны как вероятности.</p></article><article class="card"><h2>Данные и проверка</h2><div id="dataset-details"></div><p class="card-description">Варианты одного шаблона остаются в одной части набора. Тестовые варианты коррелированы; число независимых шаблонов важнее числа строк.</p><p class="card-description">Порог зафиксирован заранее. Перед внешними заявлениями о качестве потребуется новый слепой тест.</p></article></div><article class="card metrics-table-card"><h2>Сравнение методов</h2><div id="method-comparison"></div></article></section>
+      <section id="view-settings" class="view" hidden><div class="page-heading compact"><div><div class="eyebrow">QALQAN FINANCE SECURITY</div><h1>О проекте</h1><p>Цифровой щит от финансового фишинга.</p></div></div><div class="dashboard-grid"><article class="card"><h2>Что проверяет прототип</h2><ul class="feature-list"><li>Запросы кодов, паролей, PIN и CVV</li><li>Срочность, угрозы блокировки и выигрыши</li><li>Предложение перевода на «безопасный» счёт</li><li>Подмену банковского домена, IP и сокращатели</li><li>Синтетическую ML-оценку сообщений</li></ul><h4>Что требует следующего этапа</h4><p class="card-description">Репутация ссылок, WHOIS, возраст домена, анализ вложений и семантическая проверка отрицаний. Текущий справочник доменов — демонстрационный, не подтверждение подлинности сайта.</p></article><article class="card"><h2>Данные и интеграция</h2><p class="card-description">Сообщения обрабатываются в памяти. Сохраняются время, канал, балл, признаки и домены. Отдельные истории изолированы случайным HttpOnly cookie.</p><p class="card-description">Очистка старых записей происходит при новой проверке. Для строгого удаления по времени в пилоте потребуется планировщик. Смена браузера или очистка cookie создаёт новую сессию.</p><div class="api-callout"><strong>FastAPI · ML · PostgreSQL</strong><p>Документация интеграции — OpenAPI.</p><a href="/docs" target="_blank" rel="noopener">Открыть API ↗</a></div><p class="card-description">Демо работает на одной реплике. Для банковского внедрения нужны аккаунты, общий rate limiter и независимая валидация.</p></article></div></section>
+      <footer class="main-footer"><span>Qalqan Finance Security</span><span>Создано для осознанных финансовых решений</span><span>RU · KZ · EN</span></footer>
+    </main>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </div>
+</body>
+</html>
