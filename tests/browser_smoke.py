@@ -10,22 +10,32 @@ OUTPUT = ROOT / "artifacts"
 def main():
     OUTPUT.mkdir(exist_ok=True)
     console_errors = []
+    analysis_requests = []
     with sync_playwright() as p:
         executable = os.getenv("CHROMIUM_PATH")
         browser = p.chromium.launch(executable_path=executable, headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
         context = browser.new_context(viewport={"width": 1440, "height": 1100})
         page = context.new_page()
         page.on("pageerror", lambda error: console_errors.append(str(error)))
-        page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000"), wait_until="networkidle")
+        page.on("request", lambda request: analysis_requests.append(request) if request.method == "POST" and request.url.endswith("/api/analyze") else None)
+        page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000") + "/#demo", wait_until="networkidle")
         expect(page.locator("#connection-status")).to_have_text("API подключён")
+        expect(page.locator("#view-demo")).to_be_visible()
+        assert not analysis_requests, "Opening demo must not create checks"
+        page.screenshot(path=str(OUTPUT / "desktop-demo.png"), full_page=True)
         if os.getenv("EXPECT_EPHEMERAL_HISTORY") == "true":
             expect(page.locator("#history-retention")).to_contain_text("История в демо временная")
-        page.screenshot(path=str(OUTPUT / "desktop-analyzer.png"), full_page=True)
         for sample, verdict in (("phishing", "Высокий риск"), ("safe", "Низкий риск"), ("url", "Подозрительно")):
-            page.locator(f'[data-sample="{sample}"]').click()
-            page.locator("#analyze-button").click()
+            page.locator('nav [data-view="demo"]').click()
+            expected_text = page.locator(f'[data-demo-text="{sample}"]').inner_text()
+            page.locator(f'[data-demo="{sample}"]').click()
+            expect(page.locator("#view-analyzer")).to_be_visible()
+            expect(page.locator("#content")).to_have_value(expected_text)
             expect(page.locator("#result-status")).to_have_text("Проверка завершена")
             expect(page.locator("#risk-verdict")).to_have_text(verdict)
+        assert len(analysis_requests) == 3, "Each demo button should create exactly one analysis"
+        expect(page.locator("#ml-score")).to_have_text("Не применяется")
+        page.screenshot(path=str(OUTPUT / "desktop-analyzer.png"), full_page=True)
         with page.expect_download() as download:
             page.locator("#download-report").click()
         download.value.save_as(str(OUTPUT / "sample-risk-report.pdf"))
@@ -54,10 +64,14 @@ def main():
         page.locator('[data-sample="phishing"]').click()
         page.locator("#analyze-button").click()
         expect(page.locator("#risk-verdict")).to_have_text("Высокий риск")
+        page.locator('nav [data-view="demo"]').click()
+        expect(page.locator("#view-demo")).to_be_visible()
+        page.screenshot(path=str(OUTPUT / "mobile-demo.png"), full_page=True)
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         assert not console_errors, console_errors
         context.close()
         browser.close()
-    print("Browser smoke passed: 5 views, 3 cases, PDF, isolation, mobile, no page errors")
+    print("Browser smoke passed: 6 views, demo creates no checks until clicked, 3 real analyses, PDF, isolation, mobile, no page errors")
 
 
 if __name__ == "__main__":

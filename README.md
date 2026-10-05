@@ -4,6 +4,8 @@
 
 **Рабочее демо:** https://qalqan-finance2.onrender.com · [Render Dashboard](https://dashboard.render.com/web/srv-db1igdqd0e5s73ftf730) · [Pull request](https://github.com/birliktuzdyermek-tech/Finance2/pull/1)
 
+**Для жюри:** https://qalqan-finance2.onrender.com/#demo — три сценария с запуском реального анализа, затем история, PDF и экспериментальные метрики. Открытие страницы не создаёт проверки; каждый сценарий запускается кнопкой.
+
 ## Быстрый запуск
 
 Требуется Python 3.12. Выполняйте команды из корня репозитория.

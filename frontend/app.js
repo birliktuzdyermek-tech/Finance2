@@ -1,7 +1,7 @@
 'use strict';
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const names = {analyzer:'Анализатор',dashboard:'Обзор угроз',history:'История проверок',research:'Модель и метрики',settings:'О проекте'};
+const names = {demo:'Демо для жюри',analyzer:'Анализатор',dashboard:'Обзор угроз',history:'История проверок',research:'Модель и метрики',settings:'О проекте'};
 const verdicts = {low:'Низкий риск',suspicious:'Подозрительно',high:'Высокий риск'};
 const channels = {sms:'SMS',whatsapp:'WhatsApp',email:'Email',url:'Ссылка'};
 let channel='sms', historyItems=[], busy=false, toastTimer, routeVersion=0;
@@ -78,13 +78,20 @@ async function route() {
 $$('[data-channel]').forEach(b=>b.addEventListener('click',()=>setChannel(b.dataset.channel)));
 $('#content').addEventListener('input',()=>{$('#char-count').textContent=$('#content').value.length.toLocaleString('ru-RU')+' / 10 000';});
 const samples={phishing:{channel:'sms',text:'Срочно! Ваш счёт будет заблокирован. Введите код из SMS и CVV карты для проверки на http://kaspi-verify.example/login'},safe:{channel:'sms',text:'Покупка на 3 500 ₸. Чек доступен в приложении банка.'},url:{channel:'url',text:'https://kaspi.kz.verify.example/confirm'}};
-$$('[data-sample]').forEach(b=>b.addEventListener('click',()=>{const s=samples[b.dataset.sample];setChannel(s.channel);$('#content').value=s.text;$('#content').dispatchEvent(new Event('input'));$('#content').focus();}));
+function loadSample(key) {const s=samples[key];setChannel(s.channel);$('#content').value=s.text;$('#content').dispatchEvent(new Event('input'));}
+$$('[data-demo-text]').forEach(n=>{n.textContent=samples[n.dataset.demoText].text;});
+$$('[data-sample]').forEach(b=>b.addEventListener('click',()=>{if(busy)return;loadSample(b.dataset.sample);$('#content').focus();}));
+$$('[data-demo]').forEach(b=>b.addEventListener('click',()=>{
+  if(busy)return;
+  loadSample(b.dataset.demo);location.hash='analyzer';route();
+  $('#analyze-button').focus();$('#analysis-form').requestSubmit();
+}));
 $('#analysis-form').addEventListener('submit',async e=>{
   e.preventDefault();if(busy)return;const content=$('#content').value.trim();if(content.length<3){toast('Введите минимум 3 символа.');return;}
-  busy=true;$('#analyze-button').disabled=true;$('#analyze-button').setAttribute('aria-busy','true');$('#result-status').textContent='Анализируем…';$('#form-error').hidden=true;
+  busy=true;$('#analyze-button').disabled=true;$$('[data-demo]').forEach(b=>{b.disabled=true;});$('#analyze-button').setAttribute('aria-busy','true');$('#result-status').textContent='Анализируем…';$('#form-error').hidden=true;
   try{renderResult(await api('analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content,channel})}));}
   catch(e){$('#form-error').textContent=e.message||'API недоступен.';$('#form-error').hidden=false;$('#result-status').textContent='Ошибка проверки';}
-  finally{busy=false;$('#analyze-button').disabled=false;$('#analyze-button').setAttribute('aria-busy','false');}
+  finally{busy=false;$('#analyze-button').disabled=false;$$('[data-demo]').forEach(b=>{b.disabled=false;});$('#analyze-button').setAttribute('aria-busy','false');}
 });
 $('#history-filter').addEventListener('change',renderHistory);
 $('#clear-history').addEventListener('click',async()=>{
