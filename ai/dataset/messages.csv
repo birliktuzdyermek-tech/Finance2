@@ -1,0 +1,133 @@
+id,group,language,label,split,text,source
+g00v0,g00,ru,0,train,Покупка на 3500 ₸. Чек доступен в приложении банка.,authored_synthetic
+g00v1,g00,ru,0,train,Покупка на 18000 ₸. Чек доступен в приложении банка.,authored_synthetic
+g00v2,g00,ru,0,train,Покупка на 42000 ₸. Чек доступен в приложении банка.,authored_synthetic
+g01v0,g01,ru,0,train,"Ваша выписка за месяц готова. Откройте приложение, чтобы посмотреть расходы.",authored_synthetic
+g01v1,g01,ru,0,train,"Ваша выписка за месяц готова. Откройте приложение, чтобы посмотреть расходы.",authored_synthetic
+g01v2,g01,ru,0,train,"Ваша выписка за месяц готова. Откройте приложение, чтобы посмотреть расходы.",authored_synthetic
+g02v0,g02,ru,0,train,Вы получили перевод 3500 ₸. Баланс обновлён.,authored_synthetic
+g02v1,g02,ru,0,train,Вы получили перевод 18000 ₸. Баланс обновлён.,authored_synthetic
+g02v2,g02,ru,0,train,Вы получили перевод 42000 ₸. Баланс обновлён.,authored_synthetic
+g03v0,g03,ru,0,train,Напоминаем: никогда не сообщайте код из SMS и CVV сотрудникам банка.,authored_synthetic
+g03v1,g03,ru,0,train,Напоминаем: никогда не сообщайте код из SMS и CVV сотрудникам банка.,authored_synthetic
+g03v2,g03,ru,0,train,Напоминаем: никогда не сообщайте код из SMS и CVV сотрудникам банка.,authored_synthetic
+g04v0,g04,ru,0,train,Отделение банка работает с 9:00 до 18:00. Запись доступна в приложении.,authored_synthetic
+g04v1,g04,ru,0,train,Отделение банка работает с 9:00 до 18:00. Запись доступна в приложении.,authored_synthetic
+g04v2,g04,ru,0,train,Отделение банка работает с 9:00 до 18:00. Запись доступна в приложении.,authored_synthetic
+g05v0,g05,ru,0,train,Платёж за коммунальные услуги на 3500 ₸ успешно выполнен.,authored_synthetic
+g05v1,g05,ru,0,train,Платёж за коммунальные услуги на 18000 ₸ успешно выполнен.,authored_synthetic
+g05v2,g05,ru,0,train,Платёж за коммунальные услуги на 42000 ₸ успешно выполнен.,authored_synthetic
+g06v0,g06,ru,0,train,Ставки по депозитам опубликованы на https://kaspi.kz.,authored_synthetic
+g06v1,g06,ru,0,train,Ставки по депозитам опубликованы на https://kaspi.kz.,authored_synthetic
+g06v2,g06,ru,0,train,Ставки по депозитам опубликованы на https://kaspi.kz.,authored_synthetic
+g07v0,g07,ru,0,test,Карта готова к выдаче. Заберите её в выбранном отделении с документом.,authored_synthetic
+g07v1,g07,ru,0,test,Карта готова к выдаче. Заберите её в выбранном отделении с документом.,authored_synthetic
+g07v2,g07,ru,0,test,Карта готова к выдаче. Заберите её в выбранном отделении с документом.,authored_synthetic
+g08v0,g08,ru,0,test,Сервис временно недоступен из-за технических работ. Попробуйте позже.,authored_synthetic
+g08v1,g08,ru,0,test,Сервис временно недоступен из-за технических работ. Попробуйте позже.,authored_synthetic
+g08v2,g08,ru,0,test,Сервис временно недоступен из-за технических работ. Попробуйте позже.,authored_synthetic
+g09v0,g09,ru,0,test,Не отправляйте пароль никому. Проверяйте уведомления в официальном приложении.,authored_synthetic
+g09v1,g09,ru,0,test,Не отправляйте пароль никому. Проверяйте уведомления в официальном приложении.,authored_synthetic
+g09v2,g09,ru,0,test,Не отправляйте пароль никому. Проверяйте уведомления в официальном приложении.,authored_synthetic
+g10v0,g10,ru,1,train,Срочно! Счёт будет заблокирован. Введите код из SMS на http://kaspi-verify.example/login.,authored_synthetic
+g10v1,g10,ru,1,train,Срочно! Счёт будет заблокирован. Введите код из SMS на http://kaspi-verify.example/login.,authored_synthetic
+g10v2,g10,ru,1,train,Срочно! Счёт будет заблокирован. Введите код из SMS на http://kaspi-verify.example/login.,authored_synthetic
+g11v0,g11,ru,1,train,"Поздравляем, вы выиграли 3500 ₸! Укажите CVV карты для получения выплаты.",authored_synthetic
+g11v1,g11,ru,1,train,"Поздравляем, вы выиграли 18000 ₸! Укажите CVV карты для получения выплаты.",authored_synthetic
+g11v2,g11,ru,1,train,"Поздравляем, вы выиграли 42000 ₸! Укажите CVV карты для получения выплаты.",authored_synthetic
+g12v0,g12,ru,1,train,Это служба безопасности. Переведите деньги на безопасный счёт прямо сейчас.,authored_synthetic
+g12v1,g12,ru,1,train,Это служба безопасности. Переведите деньги на безопасный счёт прямо сейчас.,authored_synthetic
+g12v2,g12,ru,1,train,Это служба безопасности. Переведите деньги на безопасный счёт прямо сейчас.,authored_synthetic
+g13v0,g13,ru,1,train,Подтвердите пароль и номер карты на https://halykbank.kz.fake.example.,authored_synthetic
+g13v1,g13,ru,1,train,Подтвердите пароль и номер карты на https://halykbank.kz.fake.example.,authored_synthetic
+g13v2,g13,ru,1,train,Подтвердите пароль и номер карты на https://halykbank.kz.fake.example.,authored_synthetic
+g14v0,g14,ru,1,train,Возврат 3500 ₸ ожидает подтверждения. Отправьте PIN и код из SMS оператору.,authored_synthetic
+g14v1,g14,ru,1,train,Возврат 18000 ₸ ожидает подтверждения. Отправьте PIN и код из SMS оператору.,authored_synthetic
+g14v2,g14,ru,1,train,Возврат 42000 ₸ ожидает подтверждения. Отправьте PIN и код из SMS оператору.,authored_synthetic
+g15v0,g15,ru,1,train,Банк обнаружил взлом. Немедленно пришлите данные карты и CVC.,authored_synthetic
+g15v1,g15,ru,1,train,Банк обнаружил взлом. Немедленно пришлите данные карты и CVC.,authored_synthetic
+g15v2,g15,ru,1,train,Банк обнаружил взлом. Немедленно пришлите данные карты и CVC.,authored_synthetic
+g16v0,g16,ru,1,train,Ваш счёт заблокирован. Восстановите доступ по ссылке http://192.0.2.1/bank.,authored_synthetic
+g16v1,g16,ru,1,train,Ваш счёт заблокирован. Восстановите доступ по ссылке http://192.0.2.1/bank.,authored_synthetic
+g16v2,g16,ru,1,train,Ваш счёт заблокирован. Восстановите доступ по ссылке http://192.0.2.1/bank.,authored_synthetic
+g17v0,g17,ru,1,test,Для отмены чужого платежа назовите код подтверждения. Немедленно ответьте на сообщение.,authored_synthetic
+g17v1,g17,ru,1,test,Для отмены чужого платежа назовите код подтверждения. Немедленно ответьте на сообщение.,authored_synthetic
+g17v2,g17,ru,1,test,Для отмены чужого платежа назовите код подтверждения. Немедленно ответьте на сообщение.,authored_synthetic
+g18v0,g18,ru,1,test,Вы выиграли приз. Введите CVV и пароль для доставки https://kaspi-prize.example.,authored_synthetic
+g18v1,g18,ru,1,test,Вы выиграли приз. Введите CVV и пароль для доставки https://kaspi-prize.example.,authored_synthetic
+g18v2,g18,ru,1,test,Вы выиграли приз. Введите CVV и пароль для доставки https://kaspi-prize.example.,authored_synthetic
+g19v0,g19,ru,1,test,Отправьте 3500 ₸ на резервный счёт. Иначе карта попадёт под блокировку.,authored_synthetic
+g19v1,g19,ru,1,test,Отправьте 18000 ₸ на резервный счёт. Иначе карта попадёт под блокировку.,authored_synthetic
+g19v2,g19,ru,1,test,Отправьте 42000 ₸ на резервный счёт. Иначе карта попадёт под блокировку.,authored_synthetic
+g20v0,g20,en,0,train,Your payment of 3500 KZT is complete. Receipt is available in the bank app.,authored_synthetic
+g20v1,g20,en,0,train,Your payment of 18000 KZT is complete. Receipt is available in the bank app.,authored_synthetic
+g20v2,g20,en,0,train,Your payment of 42000 KZT is complete. Receipt is available in the bank app.,authored_synthetic
+g21v0,g21,en,0,train,Your monthly statement is ready. View it in your mobile banking application.,authored_synthetic
+g21v1,g21,en,0,train,Your monthly statement is ready. View it in your mobile banking application.,authored_synthetic
+g21v2,g21,en,0,train,Your monthly statement is ready. View it in your mobile banking application.,authored_synthetic
+g22v0,g22,en,0,train,"Never share your password or OTP with anyone, including bank staff.",authored_synthetic
+g22v1,g22,en,0,train,"Never share your password or OTP with anyone, including bank staff.",authored_synthetic
+g22v2,g22,en,0,train,"Never share your password or OTP with anyone, including bank staff.",authored_synthetic
+g23v0,g23,en,0,train,Our office opens at 9 AM. Book your appointment in the mobile application.,authored_synthetic
+g23v1,g23,en,0,train,Our office opens at 9 AM. Book your appointment in the mobile application.,authored_synthetic
+g23v2,g23,en,0,train,Our office opens at 9 AM. Book your appointment in the mobile application.,authored_synthetic
+g24v0,g24,en,0,test,A transfer has arrived. Check the balance in your official bank application.,authored_synthetic
+g24v1,g24,en,0,test,A transfer has arrived. Check the balance in your official bank application.,authored_synthetic
+g24v2,g24,en,0,test,A transfer has arrived. Check the balance in your official bank application.,authored_synthetic
+g25v0,g25,en,0,test,Do not enter your CVV on unknown websites. Keep your card details private.,authored_synthetic
+g25v1,g25,en,0,test,Do not enter your CVV on unknown websites. Keep your card details private.,authored_synthetic
+g25v2,g25,en,0,test,Do not enter your CVV on unknown websites. Keep your card details private.,authored_synthetic
+g26v0,g26,en,1,train,Urgent: your account will be suspended. Enter your OTP at http://bank-check.example.,authored_synthetic
+g26v1,g26,en,1,train,Urgent: your account will be suspended. Enter your OTP at http://bank-check.example.,authored_synthetic
+g26v2,g26,en,1,train,Urgent: your account will be suspended. Enter your OTP at http://bank-check.example.,authored_synthetic
+g27v0,g27,en,1,train,You won a prize of 3500 KZT. Share your card password and CVV to claim it.,authored_synthetic
+g27v1,g27,en,1,train,You won a prize of 18000 KZT. Share your card password and CVV to claim it.,authored_synthetic
+g27v2,g27,en,1,train,You won a prize of 42000 KZT. Share your card password and CVV to claim it.,authored_synthetic
+g28v0,g28,en,1,train,Immediately transfer your money to our safe account to protect your savings.,authored_synthetic
+g28v1,g28,en,1,train,Immediately transfer your money to our safe account to protect your savings.,authored_synthetic
+g28v2,g28,en,1,train,Immediately transfer your money to our safe account to protect your savings.,authored_synthetic
+g29v0,g29,en,1,train,Provide your PIN and password to cancel an unauthorized withdrawal.,authored_synthetic
+g29v1,g29,en,1,train,Provide your PIN and password to cancel an unauthorized withdrawal.,authored_synthetic
+g29v2,g29,en,1,train,Provide your PIN and password to cancel an unauthorized withdrawal.,authored_synthetic
+g30v0,g30,en,1,test,Claim your reward now. Send your card number and CVV to the support agent.,authored_synthetic
+g30v1,g30,en,1,test,Claim your reward now. Send your card number and CVV to the support agent.,authored_synthetic
+g30v2,g30,en,1,test,Claim your reward now. Send your card number and CVV to the support agent.,authored_synthetic
+g31v0,g31,en,1,test,Your account is blocked. Confirm your OTP within 5 minutes at https://halykbank-help.example.,authored_synthetic
+g31v1,g31,en,1,test,Your account is blocked. Confirm your OTP within 5 minutes at https://halykbank-help.example.,authored_synthetic
+g31v2,g31,en,1,test,Your account is blocked. Confirm your OTP within 5 minutes at https://halykbank-help.example.,authored_synthetic
+g32v0,g32,kz,0,train,Картаңызға 3500 теңге түсті. Балансты банк қосымшасынан көре аласыз.,authored_synthetic
+g32v1,g32,kz,0,train,Картаңызға 18000 теңге түсті. Балансты банк қосымшасынан көре аласыз.,authored_synthetic
+g32v2,g32,kz,0,train,Картаңызға 42000 теңге түсті. Балансты банк қосымшасынан көре аласыз.,authored_synthetic
+g33v0,g33,kz,0,train,Коммуналдық төлем сәтті орындалды. Түбіртек қосымшада сақталған.,authored_synthetic
+g33v1,g33,kz,0,train,Коммуналдық төлем сәтті орындалды. Түбіртек қосымшада сақталған.,authored_synthetic
+g33v2,g33,kz,0,train,Коммуналдық төлем сәтті орындалды. Түбіртек қосымшада сақталған.,authored_synthetic
+g34v0,g34,kz,0,train,Банк бөлімшесі сағат 9:00-де ашылады. Кезекке қосымша арқылы жазылыңыз.,authored_synthetic
+g34v1,g34,kz,0,train,Банк бөлімшесі сағат 9:00-де ашылады. Кезекке қосымша арқылы жазылыңыз.,authored_synthetic
+g34v2,g34,kz,0,train,Банк бөлімшесі сағат 9:00-де ашылады. Кезекке қосымша арқылы жазылыңыз.,authored_synthetic
+g35v0,g35,kz,0,train,Депозит туралы ақпарат https://halykbank.kz сайтында қолжетімді.,authored_synthetic
+g35v1,g35,kz,0,train,Депозит туралы ақпарат https://halykbank.kz сайтында қолжетімді.,authored_synthetic
+g35v2,g35,kz,0,train,Депозит туралы ақпарат https://halykbank.kz сайтында қолжетімді.,authored_synthetic
+g36v0,g36,kz,0,test,Айлық есеп дайын. Шығындарды ресми банк қосымшасынан қараңыз.,authored_synthetic
+g36v1,g36,kz,0,test,Айлық есеп дайын. Шығындарды ресми банк қосымшасынан қараңыз.,authored_synthetic
+g36v2,g36,kz,0,test,Айлық есеп дайын. Шығындарды ресми банк қосымшасынан қараңыз.,authored_synthetic
+g37v0,g37,kz,0,test,Жаңа карта дайын болды. Жеке куәлікпен бөлімшеге келіңіз.,authored_synthetic
+g37v1,g37,kz,0,test,Жаңа карта дайын болды. Жеке куәлікпен бөлімшеге келіңіз.,authored_synthetic
+g37v2,g37,kz,0,test,Жаңа карта дайын болды. Жеке куәлікпен бөлімшеге келіңіз.,authored_synthetic
+g38v0,g38,kz,1,train,Шұғыл! Шотыңыз бұғатталады. SMS кодты жібере салыңыз http://kaspi-check.example.,authored_synthetic
+g38v1,g38,kz,1,train,Шұғыл! Шотыңыз бұғатталады. SMS кодты жібере салыңыз http://kaspi-check.example.,authored_synthetic
+g38v2,g38,kz,1,train,Шұғыл! Шотыңыз бұғатталады. SMS кодты жібере салыңыз http://kaspi-check.example.,authored_synthetic
+g39v0,g39,kz,1,train,Сіз 3500 теңге ұтып алдыңыз! CVV кодты енгізіңіз.,authored_synthetic
+g39v1,g39,kz,1,train,Сіз 18000 теңге ұтып алдыңыз! CVV кодты енгізіңіз.,authored_synthetic
+g39v2,g39,kz,1,train,Сіз 42000 теңге ұтып алдыңыз! CVV кодты енгізіңіз.,authored_synthetic
+g40v0,g40,kz,1,train,Ақшаны қауіпсіз шотқа аударыңыз. Дереу әрекет етіңіз.,authored_synthetic
+g40v1,g40,kz,1,train,Ақшаны қауіпсіз шотқа аударыңыз. Дереу әрекет етіңіз.,authored_synthetic
+g40v2,g40,kz,1,train,Ақшаны қауіпсіз шотқа аударыңыз. Дереу әрекет етіңіз.,authored_synthetic
+g41v0,g41,kz,1,train,Құпия кодты айтыңыз. Картаңызды тексеру қажет https://forte-bank.example.,authored_synthetic
+g41v1,g41,kz,1,train,Құпия кодты айтыңыз. Картаңызды тексеру қажет https://forte-bank.example.,authored_synthetic
+g41v2,g41,kz,1,train,Құпия кодты айтыңыз. Картаңызды тексеру қажет https://forte-bank.example.,authored_synthetic
+g42v0,g42,kz,1,test,"Дереу PIN кодты жіберіңіз, әйтпесе картаңыз бұғатталады.",authored_synthetic
+g42v1,g42,kz,1,test,"Дереу PIN кодты жіберіңіз, әйтпесе картаңыз бұғатталады.",authored_synthetic
+g42v2,g42,kz,1,test,"Дереу PIN кодты жіберіңіз, әйтпесе картаңыз бұғатталады.",authored_synthetic
+g43v0,g43,kz,1,test,Сыйақы алу үшін CVV кодты енгізіңіз https://kaspi-gift.example.,authored_synthetic
+g43v1,g43,kz,1,test,Сыйақы алу үшін CVV кодты енгізіңіз https://kaspi-gift.example.,authored_synthetic
+g43v2,g43,kz,1,test,Сыйақы алу үшін CVV кодты енгізіңіз https://kaspi-gift.example.,authored_synthetic
