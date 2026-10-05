@@ -2,7 +2,7 @@
 
 Конкурсный MVP для трека **Cybersecurity**: анализ финансового фишинга в SMS, WhatsApp, email и URL. Рабочий интерфейс, FastAPI, объяснимые правила, ML baseline, личная история, dashboard и PDF-отчёты.
 
-**Рабочее демо:** https://qalqan-finance2.onrender.com · [Render Dashboard](https://dashboard.render.com/web/srv-db1igdqd0e5s73ftf730) · [Pull request](https://github.com/birliktuzdyermek-tech/Finance2/pull/1)
+**Рабочее демо:** https://qalqan-finance2.onrender.com · [Render Dashboard](https://dashboard.render.com/web/srv-db1igdqd0e5s73ftf730) · [Pull request](https://github.com/birliktuzdyermek-tech/Finance2/pull/2)
 
 **Для жюри:** https://qalqan-finance2.onrender.com/#demo — три сценария с запуском реального анализа, затем история, PDF и экспериментальные метрики. Открытие страницы не создаёт проверки; каждый сценарий запускается кнопкой.
 
