@@ -1,5 +1,9 @@
 # Запуск и Render
 
+Рабочий сервис: https://qalqan-finance2.onrender.com. Workspace: My Workspace. GitHub source: Finance2, ветка `codex/qalqan-mvp`. Сервис создан через MCP в Python runtime на бесплатном тарифе; база `qalqan-finance2-db` — PostgreSQL 16 в Frankfurt. DATABASE_URL задаётся только в Render environment, секрет в репозиторий не попадает. Auto deploy выключен: обновление ветки требует Manual Deploy/API trigger.
+
+Фактическое окончание free PostgreSQL: **4 ноября 2026**. Это раньше указанных ноябрьских финалов конкурса. Согласуйте продление или другую базу до этой даты. Free web service может засыпать при простое; откройте демо заранее перед защитой.
+
 Локальный Python и Docker описаны в README. Docker использует Python 3.12, одного непривилегированного пользователя, DejaVu Sans и одну uvicorn-реплику. PostgreSQL хранится в volume, порт БД не публикуется. Пароль задайте в `.env`; не коммитьте его. Для URL подключения применяйте URL-безопасный пароль или percent-encoding.
 
 ## Render Blueprint

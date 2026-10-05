@@ -118,6 +118,7 @@ class APITests(unittest.TestCase):
     def test_static_and_openapi(self):
         for path in ("/", "/static/app.js", "/static/style.css", "/docs", "/openapi.json"):
             self.assertEqual(self.client.get(path).status_code, 200)
+        self.assertEqual(self.client.head("/").status_code, 200)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@
 
 Конкурсный MVP для трека **Cybersecurity**: анализ финансового фишинга в SMS, WhatsApp, email и URL. Рабочий интерфейс, FastAPI, объяснимые правила, ML baseline, личная история, dashboard и PDF-отчёты.
 
+**Рабочее демо:** https://qalqan-finance2.onrender.com · [Render Dashboard](https://dashboard.render.com/web/srv-db1igdqd0e5s73ftf730) · [Pull request](https://github.com/birliktuzdyermek-tech/Finance2/pull/1)
+
 ## Быстрый запуск
 
 Требуется Python 3.12. Выполняйте команды из корня репозитория.
@@ -73,6 +75,8 @@ python -m ai.evaluate
 - [Roadmap, бюджет, готовность](docs/roadmap.md), [проверки](docs/verification.md).
 
 Чтобы получить PowerPoint и PDF-материалы, установите `pip install -r presentation/requirements.txt` и выполните `python presentation/build.py`. Они появятся в `artifacts/`.
+
+Для короткой записи демо без озвучки: установите Playwright (`pip install playwright`, `python -m playwright install chromium ffmpeg`), запустите приложение и выполните `python presentation/record_demo.py`. Видео сохранится в `artifacts/Qalqan-demo.webm`.
 
 `render.yaml` подготовлен для одной Python-реплики и Managed PostgreSQL на бесплатных демо-тарифах. Настройка `PUBLIC_ORIGIN` и ограничения free tier — в документации. Docker используется для локального развёртывания. Публичный сервис не создаётся самим наличием файла.
 

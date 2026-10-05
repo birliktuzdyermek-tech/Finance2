@@ -13,4 +13,4 @@ The next step is permitted anonymized data, independent annotation, language-lev
 
 Repository: https://github.com/birliktuzdyermek-tech/Finance2
 
-University: Almaty Technological University. Team (original spelling): Бірліктұзды Ермек Жақсыбекұлы; Валентинов Ерасыл Оралсеийтович. Roles, supervisor and contact: complete before submission. Add the public demo URL and video after publication.
+University: Almaty Technological University. Team (original spelling): Бірліктұзды Ермек Жақсыбекұлы; Валентинов Ерасыл Оралсеийтович. Roles, supervisor and contact: complete before submission. Live prototype: https://qalqan-finance2.onrender.com. Silent walkthrough: artifacts/Qalqan-demo.webm.

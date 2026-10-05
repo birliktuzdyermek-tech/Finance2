@@ -161,6 +161,7 @@ def create_app(database_url=None):
         path = ROOT / "ai/evaluation/metrics.json"
         return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"status": "not_evaluated"}
 
+    @app.head("/", include_in_schema=False)
     @app.get("/")
     def index():
         return FileResponse(ROOT / "frontend/index.html")
