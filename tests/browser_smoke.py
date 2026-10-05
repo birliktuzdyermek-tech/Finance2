@@ -42,7 +42,7 @@ def main():
         # Fresh browser context cannot retrieve the first context's report.
         report_path = page.locator("#download-report").get_attribute("href")
         other = browser.new_context()
-        response = other.request.get(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000") + report_path)
+        response = other.new_page().goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000") + report_path)
         assert response.status == 404
         other.close()
         page.locator('[data-view="analyzer"]').click()
