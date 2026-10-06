@@ -43,6 +43,10 @@ def main():
 
         page.goto(BASE_URL + "/", wait_until="networkidle")
         expect(page.locator("#view-home")).to_be_visible(timeout=60000)
+        page.goto(BASE_URL + "/#telegram", wait_until="networkidle")
+        expect(page.locator("#view-home")).to_be_visible()
+        expect(page).to_have_url(BASE_URL + "/#home")
+        assert "Telegram" not in page.locator("body").inner_text()
         expect(page.locator("#connection-status")).to_have_text("Локальная обработка")
         assert page.locator("body").evaluate("element => getComputedStyle(element).backgroundColor") == "rgb(10, 16, 32)"
         assert not writes, "Home must not manufacture checks"
