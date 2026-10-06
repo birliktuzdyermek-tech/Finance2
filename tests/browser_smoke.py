@@ -18,10 +18,14 @@ def main():
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000"), wait_until="networkidle")
         expect(page.locator("#connection-status")).to_have_text("Локальная обработка")
+        def route(view):
+            page.evaluate("view => { location.hash = view; }", view)
+            expect(page.locator(f"#view-{view}")).to_be_visible()
         page.on("request", lambda req: requests.append((req.method, req.url, req.post_data)))
         context.set_offline(True)
 
         for sample, verdict in (("phishing", "Высокий риск"), ("safe", "Низкий риск"), ("url", "Подозрительно")):
+            route("analyzer")
             page.locator(f'[data-sample="{sample}"]').click()
             page.locator("#analyze-button").click()
             expect(page.locator("#result-status")).to_have_text("Проверка завершена")
@@ -39,47 +43,52 @@ def main():
         conversation = "Банк: Срочно, ваш счёт заблокирован.\n\nЯ: Что делать?\n\nБанк: SMS кодты енгізіңіз."
         page.locator("#content").fill(conversation)
         page.locator("#analyze-button").click()
-        expect(page.locator("#message-evidence .evidence-card")).to_have_count(3)
+        expect(page.locator("#result-message .evidence-card")).to_have_count(3)
         expect(page.locator("#risk-score")).to_have_text("85")
-        expect(page.locator("#message-evidence .evidence-card").nth(1).locator("mark")).to_have_count(0)
+        expect(page.locator("#result-message .evidence-card").nth(1).locator("mark")).to_have_count(0)
         assert page.locator(".marked-message").all_text_contents() == conversation.split("\n\n")
         expect(page.locator("#dialogue-summary")).to_be_visible()
+        route("analyzer")
         page.locator("#content").fill("Одна реплика")
         page.locator("#analyze-button").click()
         expect(page.locator("#form-error")).to_be_visible()
         # Invalid input must not add a result or corrupt the previous analysis.
         expect(page.locator("#risk-score")).to_have_text("85")
+        route("result")
 
         for language in ("kk", "ru"):
             page.locator(f'[data-language="{language}"]').click()
             expect(page.locator("html")).to_have_attribute("lang", language)
             for key in ("received", "opened", "entered", "transferred"):
-                page.locator(f'[data-incident="{key}"]').click()
-                expect(page.locator(f'[data-incident="{key}"]')).to_have_attribute("aria-pressed", "true")
-                assert page.locator("#incident-steps li").count() >= 2
-                text = page.locator("#incident-steps").inner_text().lower()
+                page.locator(f'[data-action="{key}"]').click()
+                expect(page.locator(f'[data-action="{key}"]')).to_have_attribute("aria-pressed", "true")
+                assert page.locator("#action-steps li").count() >= 2
+                text = page.locator("#action-steps").inner_text().lower()
                 assert "банк" in text or (key == "transferred" and "полиция" in text)
-        expect(page.locator("#incident-steps")).to_contain_text("Возврат денег не гарантирован")
+        expect(page.locator("#action-steps")).to_contain_text("Возврат денег не гарантирован")
 
+        route("analyzer")
         page.locator('[data-mode="single"]').click()
         page.locator('[data-channel="sms"]').click()
         for text in ("Никогда не сообщайте код из SMS и CVV сотрудникам банка.",
                      "SMS кодты ешкімге жібермеңіз. Құпиясөзді енгізбеңіз."):
+            route("analyzer")
             page.locator("#content").fill(text)
             page.locator("#analyze-button").click()
             expect(page.locator("#risk-score")).to_have_text("0")
             expect(page.locator(".marked-message mark")).to_have_count(0)
-            expect(page.locator('[data-incident="transferred"]')).to_have_attribute("aria-pressed", "true")
+            expect(page.locator('[data-action="transferred"]')).to_have_attribute("aria-pressed", "true")
 
         def unexpected(dialog):
             unexpected_dialogs.append(dialog.message)
             dialog.dismiss()
         page.on("dialog", unexpected)
         hostile = '<img src="https://example.invalid/leak" onerror="alert(1)"><script>alert(2)</script> Срочно введите CVV.'
+        route("analyzer")
         page.locator("#content").fill(hostile)
         page.locator("#analyze-button").click()
         expect(page.locator(".marked-message")).to_have_text(hostile)
-        expect(page.locator("#message-evidence img, #message-evidence script")).to_have_count(0)
+        expect(page.locator("#result-message img, #result-message script")).to_have_count(0)
         assert not unexpected_dialogs
         page.remove_listener("dialog", unexpected)
 
@@ -94,12 +103,31 @@ def main():
                    for method, url, body in requests), requests
         assert page.evaluate("localStorage.length + sessionStorage.length") == 0
 
-        context.set_offline(False)
-        page.locator('[data-view="research"]').click()
-        expect(page.locator("#method-comparison tbody tr")).to_have_count(3)
-        assert all(method == "GET" and url.endswith(("/api/metrics", "/static/shield.svg")) and body is None
+        # Existing batch/comparison/brand flows must also remain local.
+        route("batch")
+        page.locator("#batch-example").click()
+        page.locator("#batch-submit").click()
+        expect(page.locator("#batch-results tbody tr")).to_have_count(3)
+        route("history")
+        page.locator("#history-filter").select_option("all")
+        page.locator('#history-list input[type="checkbox"]').nth(0).check()
+        page.locator('#history-list input[type="checkbox"]').nth(1).check()
+        page.locator("#compare-open").click()
+        expect(page.locator("#compare-results .compare-card")).to_have_count(2)
+        route("brand")
+        page.locator("#brand-input").fill("https://freedom-invest.example")
+        page.locator("#brand-submit").click()
+        expect(page.locator("#brand-signals")).to_contain_text("Домен похож")
+        assert all(method == "GET" and url.endswith("/static/shield.svg") and body is None
                    for method, url, body in requests), requests
-        page.locator('[data-view="settings"]').click()
+
+        context.set_offline(False)
+        route("research")
+        expect(page.locator("#method-comparison tbody tr")).to_have_count(5)
+        expect(page.locator("#adversarial-results tbody tr")).to_have_count(10)
+        assert all(method == "GET" and url.endswith(("/api/metrics", "/api/metrics/adversarial", "/static/shield.svg")) and body is None
+                   for method, url, body in requests), requests
+        route("settings")
         expect(page.locator("#view-settings")).to_be_visible()
         page.locator('[data-view="history"]').click()
         page.once("dialog", lambda dialog: dialog.accept())
@@ -119,7 +147,7 @@ def main():
         page.evaluate("document.documentElement.style.fontSize = '200%'")
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         page.reload(wait_until="networkidle")
-        page.locator('[data-view="history"]').click()
+        route("history")
         expect(page.locator("#history-list tbody tr")).to_have_count(0)
         assert not errors, errors
         context.close()

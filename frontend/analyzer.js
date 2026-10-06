@@ -2,7 +2,8 @@
  * offsets into the original input, not a normalized/lowercased copy. */
 (function (root) {
   'use strict';
-  const domains = ['kaspi.kz', 'halykbank.kz', 'homebank.kz', 'bcc.kz', 'forte.kz'];
+  const domains = ['kaspi.kz', 'halykbank.kz', 'homebank.kz', 'bcc.kz', 'forte.kz', 'bankffin.kz', 'jusan.kz', 'egov.kz', 'post.kz', 'airastana.com'];
+  const brandNames = [...domains.map(domain=>domain.split('.')[0]),'freedom','halyk','kazpost'];
   const shorteners = new Set(['bit.ly', 'tinyurl.com', 't.co', 'clck.ru', 'cutt.ly']);
   const weights = {secret_request:45, urgency:18, account_threat:22, reward:15, transfer:35,
     payment:17, malformed_url:25, no_https:10, userinfo:30, ip_host:25, local_host:25,
@@ -90,9 +91,7 @@
       if(host==='localhost'||host.endsWith('.local'))flag('local_host');
       if(shorteners.has(host))flag('shortener');
       if(host.split('.').some(s=>s.startsWith('xn--')))flag('idn');
-      if(!known && domains.some(domain=>{
-        const brand=domain.split('.')[0];return host.includes(brand)||host.split('.').some(label=>oneEdit(brand,label));
-      }))flag('impersonation');
+      if(!known && brandNames.some(brand=>host.includes(brand)||host.split('.').some(label=>oneEdit(brand,label))))flag('impersonation');
       if(raw.length>180)flag('long_url',[start,end]);
       if(host.split('.').length>4)flag('subdomains');
     }

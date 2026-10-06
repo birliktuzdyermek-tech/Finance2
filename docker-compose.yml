@@ -7,6 +7,10 @@ services:
       DATABASE_URL: postgresql://qalqan:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/qalqan
       COOKIE_SECURE: "false"
       PUBLIC_ORIGIN: http://localhost:8000
+      RATE_LIMIT: "30"
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:-}
     depends_on:
       db:
         condition: service_healthy

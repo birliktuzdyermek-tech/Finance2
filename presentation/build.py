@@ -17,7 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "artifacts"
-INK, MINT, WHITE, MUTED = "102F37", "65D9BF", "F3F8F6", "A7C5C6"
+INK, CARD, CYAN, WHITE, MUTED = "0A1020", "121B2E", "31BDF2", "EDF1FA", "ADB9CE"
 
 
 def text(slide, value, x, y, width, height, size=24, color=WHITE, bold=False):
@@ -50,33 +50,33 @@ def build_deck():
         slide = prs.slides.add_slide(prs.slide_layouts[6])
         slide.background.fill.solid()
         slide.background.fill.fore_color.rgb = RGBColor.from_string(INK)
-        shape(slide, 11.95, -0.4, 2.1, 2.1, "1B454B", MSO_SHAPE.OVAL)
-        text(slide, entry["kicker"], .65, .5, 11.4, .3, 12, MINT, True)
+        shape(slide, 11.95, -0.4, 2.1, 2.1, CARD, MSO_SHAPE.OVAL)
+        text(slide, entry["kicker"], .65, .5, 11.4, .3, 12, CYAN, True)
         text(slide, entry["title"], .65, 1.08, 11.2, 1.55, 34 if len(entry["title"]) < 63 else 30, WHITE, True)
         if i == 8:
             metrics = [("PRECISION", "87,5%"), ("RECALL", "100%"), ("F1-SCORE", "0,933"), ("FPR", "14,3%")]
             for j, (label, value) in enumerate(metrics):
                 x = .65 + j * 3.08
-                shape(slide, x, 3.0, 2.83, 1.62, "1C4850")
+                shape(slide, x, 3.0, 2.83, 1.62, CARD)
                 text(slide, label, x+.2, 3.2, 2.4, .3, 12, MUTED)
-                text(slide, value, x+.2, 3.65, 2.4, .65, 33, MINT, True)
+                text(slide, value, x+.2, 3.65, 2.4, .65, 33, CYAN, True)
             text(slide, "Synthetic test · 42 строки / 14 шаблонов · TP 21 / FP 3 / TN 18 / FN 0", .65, 4.95, 11.5, .7, 18, WHITE)
-            text(slide, "Правила сильнее ML. Нужен новый независимый слепой тест.", .65, 5.75, 11.5, .65, 19, MINT)
+            text(slide, "Правила сильнее ML. Нужен новый независимый слепой тест.", .65, 5.75, 11.5, .65, 19, CYAN)
         elif i == 5:
             boxes = [("Frontend", .65), ("FastAPI", 3.75), ("Rules + ML", 6.85), ("Risk Engine", 9.95)]
             for label, x in boxes:
-                shape(slide, x, 3.1, 2.55, 1.0, "1C4850")
+                shape(slide, x, 3.1, 2.55, 1.0, CARD)
                 text(slide, label, x+.2, 3.38, 2.2, .4, 20, WHITE, True)
-                if x < 9: text(slide, "→", x+2.65, 3.32, .4, .5, 25, MINT)
-            text(slide, "Результат → PostgreSQL → история / dashboard / PDF", .65, 4.65, 11.5, .7, 23, MINT)
+                if x < 9: text(slide, "→", x+2.65, 3.32, .4, .5, 25, CYAN)
+            text(slide, "Результат → PostgreSQL → история / dashboard / PDF", .65, 4.65, 11.5, .7, 23, CYAN)
             text(slide, "Исходные сообщения не сохраняются. Ссылки не открываются.", .65, 5.55, 11.5, .8, 20, MUTED)
         else:
             for j, point in enumerate(entry["points"]):
                 y = 2.95 + j * .78
-                text(slide, f"{j+1:02d}", .65, y, .5, .4, 15, MINT, True)
+                text(slide, f"{j+1:02d}", .65, y, .5, .4, 15, CYAN, True)
                 text(slide, point, 1.35, y-.03, 10.85, .72, 21 if len(point) < 67 else 19, WHITE)
         text(slide, "QALQAN FINANCE SECURITY  /  RESEARCH PROTOTYPE", .65, 7.02, 10.7, .25, 9, MUTED)
-        text(slide, f"{i+1:02d} / 12", 11.8, 7.02, .9, .25, 10, MINT)
+        text(slide, f"{i+1:02d} / 12", 11.8, 7.02, .9, .25, 10, CYAN)
         slide.notes_slide.notes_text_frame.text = entry["notes"]
     prs.save(OUTPUT / "Qalqan-pitch-deck.pptx")
 
@@ -85,9 +85,10 @@ def build_pdf(source):
     font = ROOT / "backend/fonts/QalqanSans.ttf"
     pdfmetrics.registerFont(TTFont("Qalqan", str(font)))
     styles = {
-        "title": ParagraphStyle("title", fontName="Qalqan", fontSize=20, leading=26, textColor=colors.HexColor("#102f37")),
-        "subtitle": ParagraphStyle("subtitle", fontName="Qalqan", fontSize=11, leading=16, textColor=colors.HexColor("#0b8c76")),
-        "body": ParagraphStyle("body", fontName="Qalqan", fontSize=9.5, leading=14, textColor=colors.HexColor("#263c43")),
+        "title": ParagraphStyle("title", fontName="Qalqan", fontSize=20, leading=26, textColor=colors.HexColor("#" + INK)),
+        # A darker cyan remains legible on the white printable page.
+        "subtitle": ParagraphStyle("subtitle", fontName="Qalqan", fontSize=11, leading=16, textColor=colors.HexColor("#087BA5")),
+        "body": ParagraphStyle("body", fontName="Qalqan", fontSize=9.5, leading=14, textColor=colors.HexColor("#" + CARD)),
     }
     story = []
     for paragraph in source.read_text(encoding="utf-8").split("\n\n"):

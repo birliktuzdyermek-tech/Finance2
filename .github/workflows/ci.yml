@@ -38,7 +38,7 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://qalqan:ci-only-password@localhost:5432/qalqan
       - run: node --check frontend/app.js
-      - run: node --check frontend/analyzer.js && node --check frontend/i18n.js
+      - run: node --check frontend/analyzer.js && node --check frontend/i18n.js && node --check frontend/local-store.js
       - run: pip install -r tests/requirements.txt && python -m playwright install --with-deps chromium
       - name: Browser privacy and interaction regressions
         run: |
@@ -47,4 +47,6 @@ jobs:
           trap 'kill "$server_pid"' EXIT
           curl --fail --retry 30 --retry-connrefused --retry-delay 1 --retry-max-time 40 http://127.0.0.1:8000/api/health
           python -m tests.browser_smoke
+          python -m tests.design_browser_smoke
+          python -m tests.auth_browser_smoke
       - run: docker build -t qalqan-ci .
