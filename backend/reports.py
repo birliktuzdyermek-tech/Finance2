@@ -11,7 +11,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate
 
 FONT = Path(__file__).resolve().parent / "fonts/QalqanSans.ttf"
 NAVY = colors.HexColor("#172239")
@@ -125,8 +125,8 @@ def make_pdf(result):
     p("Границы проверки", "section")
     for item in result["limitations"]:
         p(f"•  {item}", "note")
-    p("Отчёт содержит только производные признаки и домены; исходное сообщение и параметры ссылок в него не включаются.", "note")
-    body.append(Spacer(1, 5))
+    # Privacy is already stated in the repeated footer. Avoid a duplicate final
+    # paragraph that can create an otherwise empty page for ordinary reports.
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(

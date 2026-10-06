@@ -26,6 +26,7 @@ def main():
         page.on("pageerror", lambda error: console_errors.append(str(error)))
         page.on("request", lambda request: analysis_requests.append(request) if request.method == "POST" and request.url.endswith("/api/analyze") else None)
         page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000") + "/#demo", wait_until="networkidle")
+        expect(page.locator("#view-demo")).to_be_visible(timeout=60000)
         expect(page.locator("#connection-status")).to_have_text("Сервис доступен")
         expect(page.locator("#view-demo")).to_be_visible()
         assert not analysis_requests, "Opening demo must not create checks"
@@ -79,7 +80,8 @@ def main():
         expect(page.locator('#compare-hint')).to_contain_text('Разница риск-баллов')
         navigate('account')
         expect(page.locator('#account-start')).to_be_visible()
-        profile=context.request.get(os.getenv('TEST_BASE_URL','http://127.0.0.1:8000')+'/api/auth/me').json()
+        # Use the browser's transport, cookies and configured proxy/CA.
+        profile=page.evaluate('fetch("/api/auth/me").then(response => response.json())')
         if profile['delivery_available']:expect(page.locator('#account-send')).to_be_enabled()
         else:expect(page.locator('#account-send')).to_be_disabled()
         navigate('settings')

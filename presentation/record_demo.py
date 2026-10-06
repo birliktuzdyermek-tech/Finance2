@@ -14,7 +14,7 @@ def main():
         context = browser.new_context(viewport={"width": 1440, "height": 1000}, record_video_dir=str(OUTPUT / "video"), record_video_size={"width": 1440, "height": 1000})
         page = context.new_page()
         page.goto(os.getenv("TEST_BASE_URL", "http://127.0.0.1:8000") + "/#home", wait_until="networkidle")
-        expect(page.locator("#view-home")).to_be_visible()
+        expect(page.locator("#view-home")).to_be_visible(timeout=60000)
         video = page.video
         def navigate(view):
             link=page.locator(f'nav [data-view="{view}"]')

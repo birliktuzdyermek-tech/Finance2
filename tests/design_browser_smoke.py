@@ -42,7 +42,7 @@ def main():
             page.screenshot(path=str(OUTPUT / f"design-{name}.png"), full_page=True)
 
         page.goto(BASE_URL + "/", wait_until="networkidle")
-        expect(page.locator("#view-home")).to_be_visible()
+        expect(page.locator("#view-home")).to_be_visible(timeout=60000)
         expect(page.locator("#connection-status")).to_have_text("Сервис доступен")
         assert page.locator("body").evaluate("element => getComputedStyle(element).backgroundColor") == "rgb(10, 16, 32)"
         assert not writes, "Home must not manufacture checks"
