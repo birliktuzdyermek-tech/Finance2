@@ -54,5 +54,12 @@ window.QalqanStore = (() => {
     if(/^checks\/[^/]+\/feedback$/.test(path)){const item=items.find(r=>r.id===path.split('/')[1]);if(item)item.feedback=data.vote;return {message:I.t('Отзыв сохранён только в этой вкладке.')};}
     throw new Error('Unsupported local operation');
   }
-  return {handles,request};
+  function saveLearning(input,context) {
+    if(!['trainer','scenario'].includes(context?.kind))throw new RangeError('learning_kind');
+    // Snapshot explanatory context independently; it is never an analyzer feature.
+    const snapshot=structuredClone(context),r=analyze(input);
+    function freeze(value){if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value);}return value;}
+    r.learning=freeze(snapshot);return r;
+  }
+  return {handles,request,saveLearning};
 })();

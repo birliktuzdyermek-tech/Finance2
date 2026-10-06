@@ -144,12 +144,17 @@
     $('scenario-reset').addEventListener('click', () => { stop(); session.reset(); refresh(); });
     $('scenario-open').addEventListener('click', () => {
       stop(); controls();
-      if (session.current.result) callbacks.openResult(session.current.result);
+      if (session.current.result) callbacks.openResult(session.current.result, {
+        kind:'scenario', catalog_version:library.version, scenario_id:scenario.id, title:scenario.title,
+        step:session.current.step, total:scenario.turns.length,
+        steps:session.steps.map(s=>({step:s.step,score:s.result.score,analyzer_version:s.result.analyzer_version,new_codes:s.newSignals.map(signal=>signal.code)}))
+      });
     });
     $('scenario-projector').addEventListener('click', callbacks.projector);
     document.addEventListener('visibilitychange', () => { if (document.hidden) { stop(); controls(); } });
     refresh();
   }
   function onRoute(view) { if (view !== 'scenarios') stop(); refresh(); }
-  root.QalqanScenarioView = {init, refresh, onRoute};
+  function clear(){stop();scenario=library.scenarios[0];session=Engine.createSession(scenario);$('scenario-select').value=scenario.id;refresh();}
+  root.QalqanScenarioView = {init, refresh, onRoute, clear};
 })(window);

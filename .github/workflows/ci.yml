@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: '22'
       - run: pip install -r requirements.txt
-      - run: node --test tests/local_analyzer.test.cjs tests/scenarios.test.cjs tests/comparison.test.cjs
+      - run: node --test tests/local_analyzer.test.cjs tests/scenarios.test.cjs tests/comparison.test.cjs tests/trainer.test.cjs
       - run: python -m unittest discover -s tests -v
       - run: python -m ai.evaluate
       - run: python -m tests.postgres_smoke
@@ -41,6 +41,7 @@ jobs:
       - run: node --check frontend/analyzer.js && node --check frontend/i18n.js && node --check frontend/local-store.js
       - run: node --check frontend/scenarios-data.js && node --check frontend/scenario-engine.js && node --check frontend/scenarios.js
       - run: node --check frontend/comparison-engine.js && node --check frontend/evidence-view.js && node --check frontend/whatif.js
+      - run: node --check frontend/trainer-data.js && node --check frontend/trainer-engine.js && node --check frontend/learning-view.js && node --check frontend/trainer.js
       - run: pip install -r tests/requirements.txt && python -m playwright install --with-deps chromium
       - name: Browser privacy and interaction regressions
         run: |
@@ -53,4 +54,5 @@ jobs:
           python -m tests.auth_browser_smoke
           TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.scenarios_browser
           TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.comparison_browser
+          TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.trainer_browser
       - run: docker build -t qalqan-ci .

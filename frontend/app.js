@@ -4,7 +4,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const I=window.QalqanI18n, E=window.QalqanEngine, Store=window.QalqanStore;
 let mode='single', incident='received';
 I.capture();
-const names = {whatif:'Что изменится?',scenarios:'Сценарии',home:'Главная',result:'Результат проверки',brand:'Проверка бренда',schemes:'Типы схем',guide:'Первый визит',glossary:'Словарь',presentation:'Презентация',states:'Помощь при ошибке',demo:'Демо для жюри',analyzer:'Анализатор',batch:'Пакетная проверка',dashboard:'Обзор угроз',history:'История проверок',compare:'Сравнение',research:'Архив эксперимента',account:'Аккаунт',privacy:'Данные и приватность',settings:'О проекте'};
+const names = {trainer:'Тренажёр',whatif:'Что изменится?',scenarios:'Сценарии',home:'Главная',result:'Результат проверки',brand:'Проверка бренда',schemes:'Типы схем',guide:'Первый визит',glossary:'Словарь',presentation:'Презентация',states:'Помощь при ошибке',demo:'Демо для жюри',analyzer:'Анализатор',batch:'Пакетная проверка',dashboard:'Обзор угроз',history:'История проверок',compare:'Сравнение',research:'Архив эксперимента',account:'Аккаунт',privacy:'Данные и приватность',settings:'О проекте'};
 const verdicts = {low:'Низкий риск',suspicious:'Подозрительно',high:'Высокий риск'};
 const channels = {sms:'SMS',whatsapp:'WhatsApp',email:'Email',url:'Ссылка'};
 let channel='sms', historyItems=[], busy=false, toastTimer, routeVersion=0;
@@ -31,7 +31,7 @@ function setChannel(value) {
   $('#content').placeholder=value==='url'?'https://example.com':'Например: «Ваш счёт будет заблокирован. Срочно подтвердите данные по ссылке…»';
 }
 function renderResult(r,sourceText="") {
-  sourceText=r.text||sourceText;activeResult=r;activeSourceText=sourceText;renderAnnotatedText(sourceText,r);
+  sourceText=r.text||sourceText;activeResult=r;activeSourceText=sourceText;renderAnnotatedText(sourceText,r);$('#result-learning').replaceChildren(window.QalqanLearning.saved(r));
   activeResultId=r.id;$('#feedback-consent').checked=false;$('#feedback-status').textContent='';
   $('#result-empty').hidden=true;$('#result-content').hidden=false;$('#result-status').textContent='Проверка завершена';
   $('#risk-score').textContent=r.score;$('#risk-circle').className='risk-circle '+r.verdict;
@@ -56,8 +56,9 @@ function table(items,limit=200,selectable=false) {
   items.slice(0,limit).forEach(item=>{
     const row=node('tr');
     if(selectable){const cell=node('td'),check=node('input');check.type='checkbox';check.checked=selectedChecks.has(item.id);check.setAttribute('aria-label','Выбрать проверку '+item.id);check.addEventListener('change',()=>{if(check.checked){if(selectedChecks.size===2){check.checked=false;toast('Для сравнения выберите две проверки. Снимите один из флажков.');return;}selectedChecks.add(item.id);}else selectedChecks.delete(item.id);updateSelection();});cell.append(check);row.append(cell);}
-    row.append(node('td',new Date(item.created_at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})),node('td',channels[item.channel]),node('td',item.urls.map(u=>u.host).join(', ')||'—','domain-cell'));
-    const sc=node('td'),open=node('button',item.score+' / 100','history-open');open.type='button';open.addEventListener('click',()=>{renderResult(item);location.hash='result';});sc.append(open);
+    const sourceCell=node('td',channels[item.channel]);sourceCell.append(node('small',window.QalqanLearning.label(item),'history-origin'));
+    row.append(node('td',new Date(item.created_at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})),sourceCell,node('td',item.urls.map(u=>u.host).join(', ')||'—','domain-cell'));
+    const sc=node('td'),open=node('button',item.score+' / 100','history-open');open.type='button';open.append(node('small','Открыть разбор','history-open-hint'));open.addEventListener('click',()=>{renderResult(item);location.hash='result';});sc.append(open);
     const vc=node('td');vc.append(node('span',verdicts[item.verdict],'pill '+item.verdict));
     const rc=node('td'),link=node('a','PDF ↓');link.href='#result';link.addEventListener('click',e=>{e.preventDefault();printResult(item);});rc.append(link);row.append(sc,vc,rc);body.append(row);
   });t.append(head,body);wrap.append(t);return wrap;
@@ -87,7 +88,8 @@ async function dashboard(version) {
 function distribution(target,values,total){target.replaceChildren();if(!total){empty(target,'Данные появятся после первой проверки.');return;}values.forEach(([label,count])=>{const row=node('div',null,'bar-row'),text=node('div',null,'bar-label'),bar=node('progress');text.append(node('span',label),node('strong',count+' · '+Math.round(count/total*100)+'%'));bar.max=total;bar.value=count;bar.setAttribute('aria-label',label+': '+count);row.append(text,bar);target.append(row);});}
 function filteredHistory(){
   const risk=$('#history-filter').value,source=$('#history-channel').value,q=$('#history-search').value.trim().toLocaleLowerCase('ru-RU');
-  const items=historyItems.filter(i=>(risk==='all'||i.verdict===risk)&&(source==='all'||i.channel===source)&&(!q||[i.id,verdicts[i.verdict],channels[i.channel],i.scheme?.title||'',...i.urls.map(u=>u.host),...i.signals.map(s=>s.title)].join(' ').toLocaleLowerCase('ru-RU').includes(q)));
+  const kind=$('#history-origin').value;
+  const items=historyItems.filter(i=>(kind==='all'||(i.learning?.kind||'own')===kind)&&(risk==='all'||i.verdict===risk)&&(source==='all'||i.channel===source)&&(!q||[i.id,verdicts[i.verdict],channels[i.channel],i.scheme?.title||'',...i.urls.map(u=>u.host),...i.signals.map(s=>s.title)].join(' ').toLocaleLowerCase('ru-RU').includes(q)));
   const order=$('#history-sort').value;
   return items.sort((a,b)=>order==='risk'?b.score-a.score||b.created_at.localeCompare(a.created_at):order==='oldest'?a.created_at.localeCompare(b.created_at):b.created_at.localeCompare(a.created_at));
 }
@@ -101,8 +103,8 @@ function renderHistory(){
 function downloadCSV(){
   const items=filteredHistory();if(!items.length)return;
   function cell(value){let s=String(value??'');if(/^[=+\-@\t\r\n]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
-  const rows=[['ID','Время UTC','Источник','Риск-балл','Вердикт','Правила','Обработка','Домены','Признаки']];
-  items.forEach(i=>rows.push([i.id,i.created_at,channels[i.channel],i.score,verdicts[i.verdict],i.rules_score,'В браузере',i.urls.map(u=>u.host).join(' | '),i.signals.map(s=>s.title).join(' | ')]));
+  const rows=[['ID','Время UTC','Источник','Риск-балл','Вердикт','Правила','Обработка','Домены','Признаки','Вид проверки','Версия анализатора']];
+  items.forEach(i=>rows.push([i.id,i.created_at,channels[i.channel],i.score,verdicts[i.verdict],i.rules_score,'В браузере',i.urls.map(u=>u.host).join(' | '),i.signals.map(s=>s.title).join(' | '),window.QalqanLearning.label(i),i.analyzer_version]));
   const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
   const link=node('a');link.href=url;link.download='qalqan-history-'+new Date().toISOString().slice(0,10)+'.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
@@ -117,6 +119,9 @@ function renderComparison(){
     card.append(detail('Правила',item.rules_score+' / 100'),detail('Обработка','В браузере'),node('h4','Найденные признаки'));
     if(!item.signals.length)card.append(node('p','Эвристические признаки не обнаружены.','card-description'));
     item.signals.forEach(s=>{const row=node('div',null,'compare-signal');row.append(node('span',s.title),node('small',other.signals.some(o=>o.code===s.code)?'Общий признак':'Только в этой проверке'));card.append(row);});
+    card.append(node('p',window.QalqanLearning.label(item)+' · '+item.analyzer_version,'card-description'));
+    const evidence=node('details',null,'history-evidence');evidence.append(node('summary','Точный текст и признаки'),window.QalqanEvidence.render(item));card.append(evidence);
+    const open=node('button','Открыть разбор','secondary-button');open.type='button';open.addEventListener('click',()=>{renderResult(item);location.hash='result';});card.append(open);
     item.urls.forEach(u=>card.append(node('div',u.host,'url-row')));const advice=node('div',null,'recommendation');advice.append(node('strong','Рекомендуемое действие'),node('p',item.advice));const report=node('a','↓ PDF-отчёт','secondary-button');report.href='#result';report.addEventListener('click',e=>{e.preventDefault();printResult(item);});card.append(advice,report);$('#compare-results').append(card);
   });
 }
@@ -140,12 +145,13 @@ async function research(version) {
 async function route() {
   const value=location.hash.slice(1),view=names[value]?value:'home',version=++routeVersion;
   if(value&&!names[value])history.replaceState(null,'',location.pathname+location.search+'#home');
-  if(document.body.classList.contains('projector-mode')&&!['result','presentation','scenarios'].includes(view))setProjector(false);
+  if(document.body.classList.contains('projector-mode')&&!['result','presentation','scenarios','trainer'].includes(view))setProjector(false);
   if(currentView!==view){window.scrollTo(0,0);currentView=view;}
   $$('.view').forEach(s=>{s.hidden=s.id!=='view-'+view;});$$('[data-view]').forEach(a=>{a.classList.toggle('active',a.dataset.view===(view==='result'?'analyzer':view));a.setAttribute('aria-current',a.dataset.view===(view==='result'?'analyzer':view)?'page':'false');});$('#page-name').textContent=names[view];
   closeNavigation();
   window.QalqanScenarioView.onRoute(view);
   window.QalqanWhatIf.onRoute(view);
+  window.QalqanTrainer.onRoute(view);
   if(view==='history')empty($('#history-list'),'Загружаем историю…');if(view==='compare'){empty($('#compare-results'),'Загружаем проверки…');$('#compare-hint').textContent='';}
   try {if(view==='dashboard')await dashboard(version);if(view==='history'||view==='compare'){const d=await api('history');if(version===routeVersion){historyItems=d.items;for(const id of selectedChecks)if(!historyItems.some(i=>i.id===id))selectedChecks.delete(id);if(view==='history')renderHistory();else prepareComparison();}}if(view==='research')await research(version);if(view==='presentation')await presentationMetrics(version);if(view==='schemes')renderSchemes();if(view==='account')await refreshAccount(version);}catch(e){if(version!==routeVersion)return;if(view==='history')empty($('#history-list'),'Не удалось загрузить историю. Попробуйте открыть раздел ещё раз.');if(view==='compare')empty($('#compare-results'),'Не удалось загрузить проверки.');toast(e.message||'API недоступен.');}
 }
@@ -165,7 +171,7 @@ function setAuthBusy(value){authBusy=value;$$('#account-send,#account-confirm,#a
 $('#account-start').addEventListener('submit',async e=>{e.preventDefault();if(authBusy||busy)return;setAuthBusy(true);$('#account-error').hidden=true;$('#account-status').textContent='Отправляем письмо…';try{const r=await api('auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('#account-email').value,consent:$('#account-consent').checked})});authChallenge=r.challenge_id;$('#account-start').hidden=true;$('#account-verify').hidden=false;$('#account-status').textContent=r.message;$('#email-code').focus();}catch(e){authError(e.message);$('#account-status').textContent='Письмо не отправлено.';}finally{setAuthBusy(false);}});
 $('#account-restart').addEventListener('click',()=>{authChallenge=null;$('#account-start').hidden=false;$('#account-verify').hidden=true;$('#email-code').value='';$('#account-status').textContent='';$('#account-error').hidden=true;refreshAccount().catch(e=>authError(e.message));});
 $('#account-verify').addEventListener('submit',async e=>{e.preventDefault();if(authBusy||busy||!authChallenge)return;setAuthBusy(true);$('#account-error').hidden=true;try{const p=await api('auth/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({challenge_id:authChallenge,email_code:$('#email-code').value})});showAccount(p);$('#email-code').value='';$('#account-status').textContent='Почта подтверждена. Вы вошли в аккаунт.';toast('Вход выполнен. Локальная история остаётся в этой вкладке.');}catch(e){authError(e.message);}finally{setAuthBusy(false);}});
-function clearPrivateViews(){window.QalqanWhatIf.clear();Store.request('history',{method:'DELETE'});activeResultId=null;activeResult=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();if($('#report-preview').open)$('#report-preview').close();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';$('#batch-output').hidden=true;$('#batch-status').textContent='';$('#compare-results').replaceChildren();$('#dashboard-stats').replaceChildren();$('#recent-checks').replaceChildren();renderHistory();}
+function clearPrivateViews(){window.QalqanWhatIf.clear();window.QalqanTrainer.clear();window.QalqanScenarioView.clear();$('#result-learning').replaceChildren();Store.request('history',{method:'DELETE'});activeResultId=null;activeResult=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();if($('#report-preview').open)$('#report-preview').close();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';$('#batch-output').hidden=true;$('#batch-status').textContent='';$('#compare-results').replaceChildren();$('#dashboard-stats').replaceChildren();$('#recent-checks').replaceChildren();renderHistory();}
 async function leaveAccount(remove){if(authBusy||busy)return;if(remove&&!window.confirm('Удалить аккаунт, контакты и все его проверки? Это действие нельзя отменить.'))return;setAuthBusy(true);$('#account-error').hidden=true;try{await api(remove?'auth/account':'auth/logout',{method:remove?'DELETE':'POST'});clearPrivateViews();$('#account-status').textContent=remove?'Аккаунт и история удалены.':'Вы вышли из аккаунта.';await refreshAccount();}catch(e){authError(e.message);}finally{setAuthBusy(false);}}
 $('#account-logout').addEventListener('click',()=>leaveAccount(false));$('#account-delete').addEventListener('click',()=>leaveAccount(true));
 $$('[data-channel]').forEach(b=>b.addEventListener('click',()=>setChannel(b.dataset.channel)));
@@ -205,7 +211,7 @@ $('#batch-form').addEventListener('submit',async e=>{
   catch(e){$('#batch-error').textContent=e.message;$('#batch-error').hidden=false;$('#batch-status').textContent='Пакет не обработан.';}
   finally{setBusy(false);}
 });
-$$('#history-filter,#history-channel,#history-sort').forEach(n=>n.addEventListener('change',()=>{historyPage=1;renderHistory();}));
+$$('#history-filter,#history-channel,#history-sort,#history-origin').forEach(n=>n.addEventListener('change',()=>{historyPage=1;renderHistory();}));
 $('#history-search').addEventListener('input',()=>{historyPage=1;renderHistory();});
 $('#history-prev').addEventListener('click',()=>{historyPage--;renderHistory();});$('#history-next').addEventListener('click',()=>{historyPage++;renderHistory();});
 $('#history-export').addEventListener('click',downloadCSV);
@@ -213,7 +219,7 @@ $('#compare-open').addEventListener('click',()=>{if(selectedChecks.size===2)loca
 $$('#compare-left,#compare-right').forEach(s=>s.addEventListener('change',()=>{selectedChecks.clear();for(const side of ['left','right'])if($('#compare-'+side).value)selectedChecks.add($('#compare-'+side).value);renderComparison();}));
 $('#clear-history').addEventListener('click',async()=>{
   if(!historyItems.length){toast('История уже пустая.');return;}if(!window.confirm('Удалить результаты и PDF-отчёты текущей сессии?'))return;
-  try{await api('history',{method:'DELETE'});window.QalqanWhatIf.clear();activeResult=null;activeResultId=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;renderHistory();$('#batch-output').hidden=true;$('#compare-results').replaceChildren();$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';toast('История удалена.');}catch(e){toast(e.message);}
+  try{await api('history',{method:'DELETE'});window.QalqanWhatIf.clear();window.QalqanTrainer.clear();window.QalqanScenarioView.clear();$('#result-learning').replaceChildren();activeResult=null;activeResultId=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;renderHistory();$('#batch-output').hidden=true;$('#compare-results').replaceChildren();$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';toast('История удалена.');}catch(e){toast(e.message);}
 });
 function renderAnnotatedText(text,result){
   $('#result-source-note').textContent=I.t(result.mode==='dialogue'?'Диалог':channels[result.channel])+' · '+new Date(result.created_at).toLocaleString(I.locale());
@@ -225,7 +231,7 @@ $('#download-report').addEventListener('click',e=>{e.preventDefault();printResul
 $('#preview-download').addEventListener('click',e=>{e.preventDefault();printResult();});
 $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;$$('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));$('#dialogue-hint').hidden=mode!=='dialogue';setChannel(channel);}));
 $$('[data-language]').forEach(b=>b.addEventListener('click',()=>{I.set(b.dataset.language);$$('[data-language]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));setChannel(channel);actionPlan(incident);if(activeResult)renderResult(activeResult);if($('#report-preview').open){$('#report-preview').close();renderPreview();}route();}));
-function setProjector(on){document.body.classList.toggle('projector-mode',on);$('#projector-exit').hidden=!on;$$('#result-projector,#presentation-projector,#scenario-projector').forEach(b=>b.setAttribute('aria-pressed',String(on)));if(on){closeNavigation();window.scrollTo(0,0);$('#projector-exit').focus();}}
+function setProjector(on){document.body.classList.toggle('projector-mode',on);$('#projector-exit').hidden=!on;$$('#result-projector,#presentation-projector,#scenario-projector,#trainer-projector').forEach(b=>b.setAttribute('aria-pressed',String(on)));if(on){closeNavigation();window.scrollTo(0,0);$('#projector-exit').focus();}}
 $('#result-projector').addEventListener('click',()=>setProjector(!document.body.classList.contains('projector-mode')));
 $('#presentation-projector').addEventListener('click',()=>setProjector(!document.body.classList.contains('projector-mode')));
 $('#projector-exit').addEventListener('click',()=>setProjector(false));
@@ -277,9 +283,14 @@ $('#connection-retry').addEventListener('click',async()=>{$('#connection-retry')
 
 window.QalqanWhatIf.init({openOriginal(result) {renderResult(result);location.hash='result';}});
 $('#result-whatif').addEventListener('click',()=>{if(activeResult)window.QalqanWhatIf.open(activeResult);});
+window.QalqanTrainer.init({
+  save(result,context) {return Store.saveLearning({content:result.text,channel:result.channel,mode:'single'},context);},
+  open(result) {renderResult(result);location.hash='result';},
+  projector() {setProjector(!document.body.classList.contains('projector-mode'));}
+});
 window.QalqanScenarioView.init({
-  openResult(result) {
-    const saved = Store.request('analyze', {body: JSON.stringify({content: result.text, channel: result.channel, mode: result.replies ? 'dialogue' : 'single'})});
+  openResult(result,context) {
+    const saved = Store.saveLearning({content:result.text,channel:result.channel,mode:result.replies?'dialogue':'single'},context);
     renderResult(saved); location.hash = 'result';
   },
   projector() { setProjector(!document.body.classList.contains('projector-mode')); }
