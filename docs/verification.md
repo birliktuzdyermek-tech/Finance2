@@ -1,13 +1,18 @@
 # Проверки выполненной реализации
 
-- 13 unittest-проверок прошли: URL boundaries, impersonation, IDN, no-DNS, отрицания, group split, API, история, очистка, PDF, session isolation, приватность БД, validation, body limit, origin/cookie headers и rate limit.
-- Playwright / Chromium: все 5 разделов, примеры фишинга/уведомления/подмены домена, dashboard = 3 выполненные проверки, фильтр истории, PDF-download, чужой report 404, экран 390px без горизонтального переполнения; нет page errors.
+- 43 unittest-проверки пройдены: анализ/API, session isolation, PDF, privacy, validation, shared atomic quota, batch rollback, expiry, email OTP/attempts/session binding, legacy schema migration, Resend request, provider failure, account deletion/logout, feedback consent, бренды и bootstrap. Стандартный отчёт с пятью признаками помещается на одной A4. Новые PDF-проверки покрывают экранирование недоверенной разметки и многостраничные отчёты с длинными полями на кириллице.
+- Новый PDF визуально проверен: обычный результат помещается на A4; расширенный пример разбивается на 9 страниц без выхода текста за границы страницы.
+- Mobile-auth Playwright / Chromium пройден после редизайна: signup/verify/logout через настоящие обработчики приложения, с mock только отправки письма. Реальные письма агент не отправлял.
+- После редизайна Playwright / Chromium проверил новые экраны: главную, анализ и проверку бренда через API, предпросмотр и скачивание PDF, схемы, словарь, инструкцию, слайды и режим проектора. На 15 мобильных маршрутах нет горизонтального переполнения или ошибок JavaScript. Проверки статичных экранов не создают анализы и не отправляют письма. Отдельный регрессионный browser smoke охватывает demo, пакет, фильтры, CSV, сравнение, метрики, feedback, изоляцию PDF и мобильное меню.
+- На публичном Render PostgreSQL подключена; конфигурация Resend доступна приложению, `/api/auth/me` возвращает `delivery_available=true`. Это проверка конфигурации, а не самостоятельное подтверждение доставки письма.
 - Синтетический evaluation выполнен. Классификационные результаты и hash находятся в `ai/evaluation/metrics.json`; latency зависит от среды.
 - Docker build завершился успешно. Образ запускается непривилегированным пользователем.
-- Реальная PostgreSQL 16 в изолированном Docker network: health, analyze, история, dashboard, PDF и очистка прошли через `tests.postgres_smoke`.
+- PostgreSQL 16: история/PDF после пересоздания, pool reuse, 24 конкурентных резерва из двух экземпляров — ровно 7 допущенных при лимите 7; SQL-сценарий регистрации/подтверждения/удаления с mock доставки.
 - Render Blueprint проверен по официальной JSON Schema (`https://render.com/schema/render.yaml.json`). Финальная конфигурация проверяется повторно перед публикацией.
 - Резюме RU/EN и one-pager экспортированы в PDF: каждый документ — 1 страница. PowerPoint — 12 редактируемых слайдов, заметки выступающего включены.
 
 Скриншоты и экспортированные материалы находятся в `artifacts/` после выполнения browser smoke / presentation build. CI содержит API, evaluation, PostgreSQL smoke и Docker build. Результат GitHub CI и публичного Render deployment фиксируется отдельно после загрузки кода.
 
 Эти проверки подтверждают работоспособность прототипа, а не точность на реальном банковском трафике или готовность к production.
+
+Локальная нагрузка: 40 запросов при concurrency 8, 40/40 HTTP 200; warm API p95 317 мс в одной managed-среде с SQLite, включая создание клиента и БД. Это не SLA Render или доказательство линейного роста нагрузки. Данные — `artifacts/load-smoke.json`.

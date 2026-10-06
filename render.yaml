@@ -2,7 +2,9 @@
 # Free demo resources; review free Postgres expiry before a competition final.
 services:
   - type: web
-    name: qalqan-finance-security
+    name: qalqan-finance2
+    repo: https://github.com/birliktuzdyermek-tech/Finance2
+    branch: codex/qalqan-mvp
     runtime: python
     plan: free
     region: frankfurt
@@ -16,18 +18,20 @@ services:
         value: "3.12.14"
       - key: DATABASE_URL
         fromDatabase:
-          name: qalqan-db
+          name: qalqan-finance2-db
           property: connectionString
       - key: COOKIE_SECURE
         value: "true"
-      - key: PUBLIC_ORIGIN
-        sync: false
+      - key: REQUIRE_POSTGRES
+        value: "true"
       - key: RATE_LIMIT
         value: "30"
+      - key: AUTH_SECRET
+        generateValue: true
 databases:
-  - name: qalqan-db
-    databaseName: qalqan
-    user: qalqan
+  - name: qalqan-finance2-db
+    databaseName: qalqan_finance2_db
+    user: qalqan_finance2_db_user
     plan: free
     region: frankfurt
     postgresMajorVersion: "16"

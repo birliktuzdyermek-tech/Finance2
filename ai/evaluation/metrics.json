@@ -1,6 +1,6 @@
 {
   "status": "evaluated",
-  "created_at": "2026-10-05T03:16:13.191390+00:00",
+  "created_at": "2026-10-05T13:17:35.121459+00:00",
   "dataset": "authored_synthetic",
   "dataset_sha256": "571f6895497ccfe158c91cbe1148af77529b68c1fe28cf88a1c814707cb13f6f",
   "seed": 42,
@@ -56,9 +56,180 @@
     },
     "decision_threshold": 0.35
   },
+  "text_rules": {
+    "precision": 1.0,
+    "recall": 0.8571,
+    "f1": 0.9231,
+    "roc_auc": 1.0,
+    "false_positive_rate": 0.0,
+    "confusion_matrix": {
+      "tn": 21,
+      "fp": 0,
+      "fn": 3,
+      "tp": 18
+    },
+    "decision_threshold": 0.35
+  },
+  "url_rules": {
+    "precision": 1.0,
+    "recall": 0.4286,
+    "f1": 0.6,
+    "roc_auc": 0.7143,
+    "false_positive_rate": 0.0,
+    "confusion_matrix": {
+      "tn": 21,
+      "fp": 0,
+      "fn": 12,
+      "tp": 9
+    },
+    "decision_threshold": 0.35
+  },
+  "bootstrap": {
+    "method": "template_group_bootstrap",
+    "confidence": 0.95,
+    "samples_requested": 1000,
+    "seed": 42,
+    "groups": 14,
+    "text_rules": {
+      "precision": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "recall": {
+        "low": 0.5,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "f1": {
+        "low": 0.6667,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "false_positive_rate": {
+        "low": 0.0,
+        "high": 0.0,
+        "valid_samples": 1000
+      },
+      "roc_auc": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      }
+    },
+    "url_rules": {
+      "precision": {
+        "low": 0.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "recall": {
+        "low": 0.0,
+        "high": 0.8,
+        "valid_samples": 1000
+      },
+      "f1": {
+        "low": 0.0,
+        "high": 0.8889,
+        "valid_samples": 1000
+      },
+      "false_positive_rate": {
+        "low": 0.0,
+        "high": 0.0,
+        "valid_samples": 1000
+      },
+      "roc_auc": {
+        "low": 0.5,
+        "high": 0.9,
+        "valid_samples": 1000
+      }
+    },
+    "rules": {
+      "precision": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "recall": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "f1": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "false_positive_rate": {
+        "low": 0.0,
+        "high": 0.0,
+        "valid_samples": 1000
+      },
+      "roc_auc": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      }
+    },
+    "hybrid": {
+      "precision": {
+        "low": 0.5714,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "recall": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "f1": {
+        "low": 0.7273,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "false_positive_rate": {
+        "low": 0.0,
+        "high": 0.5,
+        "valid_samples": 1000
+      },
+      "roc_auc": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      }
+    },
+    "ml": {
+      "precision": {
+        "low": 0.5714,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "recall": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "f1": {
+        "low": 0.7273,
+        "high": 1.0,
+        "valid_samples": 1000
+      },
+      "false_positive_rate": {
+        "low": 0.0,
+        "high": 0.5,
+        "valid_samples": 1000
+      },
+      "roc_auc": {
+        "low": 1.0,
+        "high": 1.0,
+        "valid_samples": 1000
+      }
+    }
+  },
+  "rules_version": "financial-rules-v2",
   "latency_ms": {
-    "median": 0.677,
-    "p95": 1.174,
+    "median": 0.546,
+    "p95": 1.624,
     "scope": "warm in-process inference, excludes HTTP/database"
   },
   "limitations": "Small synthetic benchmark. Variants within test groups are correlated. Scores do not estimate real-world performance or calibrated fraud probability. No threshold tuning on test. Test has been used during prototype development; obtain a new external blind test before claiming generalization."
