@@ -1,0 +1,59 @@
+{
+  "scope": "current_browser_rules_only",
+  "dataset": "authored_synthetic_development",
+  "dataset_sha256": "571f6895497ccfe158c91cbe1148af77529b68c1fe28cf88a1c814707cb13f6f",
+  "split": "test",
+  "positive_decision": "score >= 35 (suspicious or high)",
+  "overall": {
+    "rows": 42,
+    "groups": 14,
+    "tp": 18,
+    "fp": 0,
+    "tn": 21,
+    "fn": 3,
+    "precision": 1.0,
+    "recall": 0.8571428571428571,
+    "false_positive_rate": 0.0
+  },
+  "by_language": {
+    "en": {
+      "rows": 12,
+      "groups": 4,
+      "tp": 6,
+      "fp": 0,
+      "tn": 6,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "false_positive_rate": 0.0
+    },
+    "kz": {
+      "rows": 12,
+      "groups": 4,
+      "tp": 6,
+      "fp": 0,
+      "tn": 6,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "false_positive_rate": 0.0
+    },
+    "ru": {
+      "rows": 18,
+      "groups": 6,
+      "tp": 6,
+      "fp": 0,
+      "tn": 9,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "false_positive_rate": 0.0
+    }
+  },
+  "limitations": [
+    "Authored synthetic templates, not real banking traffic.",
+    "Variants within each template group are correlated.",
+    "The corpus was used during development and is not a blind external test.",
+    "These results do not measure the separate server ML or hybrid pipeline."
+  ]
+}

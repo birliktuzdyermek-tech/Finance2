@@ -139,8 +139,6 @@ def main():
         expect(page.locator("#presentation-slide-how")).to_be_visible()
         expect(page.locator("body")).not_to_have_class(re.compile(r"\bprojector-mode\b"))
 
-        route("telegram")
-        expect(page.locator("#view-telegram")).to_contain_text("Демонстрация")
         route("states")
         expect(page.locator("#view-states")).to_contain_text("Нет связи")
         assert len(writes) == static_writes, "Informational routes must not create checks"
@@ -167,7 +165,7 @@ def main():
         page.keyboard.press("Escape")
         expect(page.locator("#nav-toggle")).to_have_attribute("aria-expanded", "false")
 
-        for view in ("result", "dashboard", "history", "research", "brand", "schemes", "glossary", "guide", "presentation", "states", "telegram", "account", "batch", "compare"):
+        for view in ("result", "dashboard", "history", "research", "brand", "schemes", "glossary", "guide", "presentation", "states", "account", "batch", "compare"):
             route(view)
             if view == "dashboard":
                 expect(page.locator("#dashboard-stats .stat").first.locator("strong")).to_have_text("2")

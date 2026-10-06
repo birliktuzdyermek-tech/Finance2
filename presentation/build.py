@@ -54,22 +54,29 @@ def build_deck():
         text(slide, entry["kicker"], .65, .5, 11.4, .3, 12, CYAN, True)
         text(slide, entry["title"], .65, 1.08, 11.2, 1.55, 34 if len(entry["title"]) < 63 else 30, WHITE, True)
         if i == 8:
-            metrics = [("PRECISION", "87,5%"), ("RECALL", "100%"), ("F1-SCORE", "0,933"), ("FPR", "14,3%")]
+            metrics = [("БРАУЗЕР · PRECISION", "100%"), ("БРАУЗЕР · RECALL", "85,7%"),
+                       ("СЕРВЕР · PRECISION", "87,5%"), ("СЕРВЕР · RECALL", "100%")]
             for j, (label, value) in enumerate(metrics):
                 x = .65 + j * 3.08
                 shape(slide, x, 3.0, 2.83, 1.62, CARD)
                 text(slide, label, x+.2, 3.2, 2.4, .3, 12, MUTED)
                 text(slide, value, x+.2, 3.65, 2.4, .65, 33, CYAN, True)
-            text(slide, "Synthetic test · 42 строки / 14 шаблонов · TP 21 / FP 3 / TN 18 / FN 0", .65, 4.95, 11.5, .7, 18, WHITE)
-            text(slide, "Правила сильнее ML. Нужен новый независимый слепой тест.", .65, 5.75, 11.5, .65, 19, CYAN)
+            text(slide, "42 синтетические строки / 14 шаблонов · набор использован при разработке", .65, 4.95, 11.5, .7, 18, WHITE)
+            text(slide, "Браузер: TP 18 / FP 0 / TN 21 / FN 3 · сервер: TP 21 / FP 3 / TN 18 / FN 0", .65, 5.55, 11.5, .55, 16, WHITE)
+            text(slide, "Нужен новый независимый слепой тест.", .65, 6.12, 11.5, .5, 18, CYAN)
         elif i == 5:
-            boxes = [("Frontend", .65), ("FastAPI", 3.75), ("Rules + ML", 6.85), ("Risk Engine", 9.95)]
-            for label, x in boxes:
-                shape(slide, x, 3.1, 2.55, 1.0, CARD)
-                text(slide, label, x+.2, 3.38, 2.2, .4, 20, WHITE, True)
-                if x < 9: text(slide, "→", x+2.65, 3.32, .4, .5, 25, CYAN)
-            text(slide, "Результат → PostgreSQL → история / dashboard / PDF", .65, 4.65, 11.5, .7, 23, CYAN)
-            text(slide, "Исходные сообщения не сохраняются. Ссылки не открываются.", .65, 5.55, 11.5, .8, 20, MUTED)
+            for y, heading, labels in [
+                (2.65, "Текущая веб-форма", ("Браузер", "Локальные правила", "Результат / история")),
+                (4.35, "Отдельный серверный API", ("FastAPI", "Правила + ML", "PostgreSQL")),
+            ]:
+                text(slide, heading, .65, y, 11.5, .35, 16, CYAN, True)
+                for j, label in enumerate(labels):
+                    x = .65 + j * 4.15
+                    shape(slide, x, y+.4, 3.65, .8, CARD)
+                    text(slide, label, x+.17, y+.6, 3.35, .45, 20, WHITE, True)
+                    if j < 2:
+                        text(slide, "→", x+3.72, y+.54, .35, .4, 23, CYAN)
+            text(slide, "Веб-форма не передаёт текст серверу. Проверяемые ссылки не открываются.", .65, 6.1, 11.5, .65, 18, MUTED)
         else:
             for j, point in enumerate(entry["points"]):
                 y = 2.95 + j * .78
@@ -91,18 +98,21 @@ def build_pdf(source):
         "body": ParagraphStyle("body", fontName="Qalqan", fontSize=9.5, leading=14, textColor=colors.HexColor("#" + CARD)),
     }
     story = []
-    for paragraph in source.read_text(encoding="utf-8").split("\n\n"):
-        if not paragraph.strip():
-            continue
-        if paragraph.startswith("## "):
-            style, value = "subtitle", paragraph[3:]
-        elif paragraph.startswith("# "):
-            style, value = "title", paragraph[2:]
-        else:
-            style, value = "body", paragraph.replace("\n", " ")
-        value = re.sub(r"\*\*(.*?)\*\*", r"\1", value)
-        story.append(Paragraph(escape(value), styles[style]))
-        story.append(Spacer(1, 8))
+    for block in source.read_text(encoding="utf-8").split("\n\n"):
+        body = []
+        for line in block.splitlines():
+            if line.startswith(("# ", "## ")):
+                if body:
+                    value = re.sub(r"\*\*(.*?)\*\*", r"\1", " ".join(body))
+                    story.extend((Paragraph(escape(value), styles["body"]), Spacer(1, 8)))
+                    body = []
+                style, value = ("subtitle", line[3:]) if line.startswith("## ") else ("title", line[2:])
+                story.extend((Paragraph(escape(value), styles[style]), Spacer(1, 8)))
+            elif line.strip():
+                body.append(line.strip())
+        if body:
+            value = re.sub(r"\*\*(.*?)\*\*", r"\1", " ".join(body))
+            story.extend((Paragraph(escape(value), styles["body"]), Spacer(1, 8)))
     SimpleDocTemplate(str(OUTPUT / (source.stem + ".pdf")), pagesize=A4, leftMargin=36, rightMargin=36, topMargin=32, bottomMargin=30, title=source.stem).build(story)
 
 
