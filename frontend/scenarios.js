@@ -156,5 +156,6 @@
   }
   function onRoute(view) { if (view !== 'scenarios') stop(); refresh(); }
   function clear(){stop();scenario=library.scenarios[0];session=Engine.createSession(scenario);$('scenario-select').value=scenario.id;refresh();}
-  root.QalqanScenarioView = {init, refresh, onRoute, clear};
+  function start(id){const selected=library.scenarios.find(s=>s.id===id);if(!selected)throw new RangeError('scenario_id');stop();scenario=selected;session=Engine.createSession(scenario);$('scenario-select').value=scenario.id;refresh();}
+  root.QalqanScenarioView = {init, refresh, onRoute, clear, start};
 })(window);

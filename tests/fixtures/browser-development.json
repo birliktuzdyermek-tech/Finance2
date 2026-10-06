@@ -1,0 +1,26 @@
+{
+  "name": "qalqan-authored-development-1",
+  "scope": "Authored development cases, not an independent or representative test of banking traffic.",
+  "cases": [
+    {"id":"notice-ru","language":"ru","channel":"sms","text":"Покупка на 3 500 ₸. Чек доступен в приложении банка.","authoredWarning":false},
+    {"id":"notice-kk","language":"kk","channel":"sms","text":"Жаңа картаңыз дайын. Банк қосымшасынан қараңыз.","authoredWarning":false},
+    {"id":"notice-mixed","language":"mixed","channel":"sms","text":"Выписка по карте готова. Жаңа әрекет қажет емес.","authoredWarning":false},
+    {"id":"negation-ru","language":"ru","channel":"sms","text":"Никогда не сообщайте код из SMS и CVV сотрудникам банка.","authoredWarning":false},
+    {"id":"negation-kk","language":"kk","channel":"sms","text":"SMS кодты ешкімге жібермеңіз. Құпиясөзді енгізбеңіз.","authoredWarning":false},
+    {"id":"negated-block","language":"mixed","channel":"sms","text":"Ваша карта не заблокирована. Картаңыз бұғатталмаған.","authoredWarning":false},
+    {"id":"ordinary-dialogue","language":"mixed","channel":"whatsapp","mode":"dialogue","text":"Покупка на 3 500 ₸.\n\nРақмет!\n\nЧек доступен в приложении банка.","authoredWarning":false},
+    {"id":"secret-ru","language":"ru","channel":"sms","text":"Срочно! Счёт заблокирован. Введите код из SMS.","authoredWarning":true},
+    {"id":"secret-kk","language":"kk","channel":"sms","text":"Шұғыл! Шотыңыз бұғатталады. SMS кодты жіберіңіз.","authoredWarning":true},
+    {"id":"secret-mixed","language":"mixed","channel":"whatsapp","text":"Картаңыз бұғатталды. Срочно введите SMS кодты.","authoredWarning":true},
+    {"id":"safe-account","language":"ru","channel":"whatsapp","text":"Переведите деньги на безопасный счёт.","authoredWarning":true},
+    {"id":"lookalike-domain","language":"url","channel":"url","text":"https://kaspi.kz.verify.example/confirm","authoredWarning":true},
+    {"id":"typo-domain","language":"url","channel":"url","text":"http://kaspl.example/login","authoredWarning":true},
+    {"id":"growing-dialogue","language":"mixed","channel":"whatsapp","mode":"dialogue","text":"Здравствуйте.\n\nСрочно! Счёт заблокирован.\n\nSMS кодты жіберіңіз.","authoredWarning":true},
+    {"id":"repeated-secret","language":"mixed","channel":"whatsapp","mode":"dialogue","text":"Введите код.\n\nSMS кодты жіберіңіз.\n\nВведите код.","authoredWarning":true},
+    {"id":"quoted-warning","language":"mixed","channel":"sms","text":"Предупреждение: мошенники пишут «Срочно! Введите код из SMS». SMS кодты ешкімге жібермеңіз.","authoredWarning":false,"note":"Author describes an educational warning; rules can flag the quoted request."},
+    {"id":"coupon-code","language":"ru","channel":"sms","text":"Введите код купона для скидки на доставку.","authoredWarning":false,"note":"Coupon code is not a bank secret; the generic code rule can overreach."},
+    {"id":"implicit-request","language":"ru","channel":"whatsapp","text":"Привет, это я. У меня новый номер. Переведи 20 000 тенге по номеру, который я пришлю. Позвонить не могу.","authoredWarning":true,"note":"Author models an unverified identity and a request for money without explicit rule keywords."},
+    {"id":"mixed-script-obfuscation","language":"mixed","channel":"sms","text":"Ввeдите кoд из SMS для проверки счёта.","authoredWarning":true,"note":"Latin e/o within Cyrillic words can evade the literal patterns."},
+    {"id":"ip-only","language":"url","channel":"url","text":"https://192.0.2.10/verify","authoredWarning":true,"note":"Author flags the address for investigation; the IP rule alone can remain below the warning threshold."}
+  ]
+}

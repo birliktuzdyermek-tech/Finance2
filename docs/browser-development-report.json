@@ -1,0 +1,286 @@
+{
+  "scope": "current_browser_rules_only",
+  "dataset": "qalqan-authored-development-1",
+  "limitations": "Authored development cases, not an independent or representative test of banking traffic.",
+  "analyzer_version": "browser-rules-1.0",
+  "analyzer_sha256": "59863259956868112f9f6550c4a238b226afae63b6eef3b85e8741fb4f36f23e",
+  "dataset_sha256": "5ec8a9df73ff129faa7fe12a8d4bf561c1f8055e3d488a55e015271c66c1c2fa",
+  "decision": "score >= 35; authored labels are development judgments, not real-world ground truth",
+  "counts": {
+    "tp": 8,
+    "tn": 7,
+    "fp": 2,
+    "fn": 3
+  },
+  "cases": [
+    {
+      "id": "notice-ru",
+      "language": "ru",
+      "channel": "sms",
+      "text": "Покупка на 3 500 ₸. Чек доступен в приложении банка.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "notice-kk",
+      "language": "kk",
+      "channel": "sms",
+      "text": "Жаңа картаңыз дайын. Банк қосымшасынан қараңыз.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "notice-mixed",
+      "language": "mixed",
+      "channel": "sms",
+      "text": "Выписка по карте готова. Жаңа әрекет қажет емес.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "negation-ru",
+      "language": "ru",
+      "channel": "sms",
+      "text": "Никогда не сообщайте код из SMS и CVV сотрудникам банка.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "negation-kk",
+      "language": "kk",
+      "channel": "sms",
+      "text": "SMS кодты ешкімге жібермеңіз. Құпиясөзді енгізбеңіз.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "negated-block",
+      "language": "mixed",
+      "channel": "sms",
+      "text": "Ваша карта не заблокирована. Картаңыз бұғатталмаған.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "ordinary-dialogue",
+      "language": "mixed",
+      "channel": "whatsapp",
+      "mode": "dialogue",
+      "text": "Покупка на 3 500 ₸.\n\nРақмет!\n\nЧек доступен в приложении банка.",
+      "authoredWarning": false,
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "tn",
+      "signals": []
+    },
+    {
+      "id": "secret-ru",
+      "language": "ru",
+      "channel": "sms",
+      "text": "Срочно! Счёт заблокирован. Введите код из SMS.",
+      "authoredWarning": true,
+      "score": 85,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "secret_request",
+        "urgency",
+        "account_threat"
+      ]
+    },
+    {
+      "id": "secret-kk",
+      "language": "kk",
+      "channel": "sms",
+      "text": "Шұғыл! Шотыңыз бұғатталады. SMS кодты жіберіңіз.",
+      "authoredWarning": true,
+      "score": 85,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "secret_request",
+        "urgency",
+        "account_threat"
+      ]
+    },
+    {
+      "id": "secret-mixed",
+      "language": "mixed",
+      "channel": "whatsapp",
+      "text": "Картаңыз бұғатталды. Срочно введите SMS кодты.",
+      "authoredWarning": true,
+      "score": 85,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "secret_request",
+        "urgency",
+        "account_threat"
+      ]
+    },
+    {
+      "id": "safe-account",
+      "language": "ru",
+      "channel": "whatsapp",
+      "text": "Переведите деньги на безопасный счёт.",
+      "authoredWarning": true,
+      "score": 35,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "transfer"
+      ]
+    },
+    {
+      "id": "lookalike-domain",
+      "language": "url",
+      "channel": "url",
+      "text": "https://kaspi.kz.verify.example/confirm",
+      "authoredWarning": true,
+      "score": 45,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "impersonation"
+      ]
+    },
+    {
+      "id": "typo-domain",
+      "language": "url",
+      "channel": "url",
+      "text": "http://kaspl.example/login",
+      "authoredWarning": true,
+      "score": 55,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "no_https",
+        "impersonation"
+      ]
+    },
+    {
+      "id": "growing-dialogue",
+      "language": "mixed",
+      "channel": "whatsapp",
+      "mode": "dialogue",
+      "text": "Здравствуйте.\n\nСрочно! Счёт заблокирован.\n\nSMS кодты жіберіңіз.",
+      "authoredWarning": true,
+      "score": 85,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "urgency",
+        "account_threat",
+        "secret_request"
+      ]
+    },
+    {
+      "id": "repeated-secret",
+      "language": "mixed",
+      "channel": "whatsapp",
+      "mode": "dialogue",
+      "text": "Введите код.\n\nSMS кодты жіберіңіз.\n\nВведите код.",
+      "authoredWarning": true,
+      "score": 45,
+      "actualWarning": true,
+      "outcome": "tp",
+      "signals": [
+        "secret_request"
+      ]
+    },
+    {
+      "id": "quoted-warning",
+      "language": "mixed",
+      "channel": "sms",
+      "text": "Предупреждение: мошенники пишут «Срочно! Введите код из SMS». SMS кодты ешкімге жібермеңіз.",
+      "authoredWarning": false,
+      "note": "Author describes an educational warning; rules can flag the quoted request.",
+      "score": 63,
+      "actualWarning": true,
+      "outcome": "fp",
+      "signals": [
+        "secret_request",
+        "urgency"
+      ]
+    },
+    {
+      "id": "coupon-code",
+      "language": "ru",
+      "channel": "sms",
+      "text": "Введите код купона для скидки на доставку.",
+      "authoredWarning": false,
+      "note": "Coupon code is not a bank secret; the generic code rule can overreach.",
+      "score": 45,
+      "actualWarning": true,
+      "outcome": "fp",
+      "signals": [
+        "secret_request"
+      ]
+    },
+    {
+      "id": "implicit-request",
+      "language": "ru",
+      "channel": "whatsapp",
+      "text": "Привет, это я. У меня новый номер. Переведи 20 000 тенге по номеру, который я пришлю. Позвонить не могу.",
+      "authoredWarning": true,
+      "note": "Author models an unverified identity and a request for money without explicit rule keywords.",
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "fn",
+      "signals": []
+    },
+    {
+      "id": "mixed-script-obfuscation",
+      "language": "mixed",
+      "channel": "sms",
+      "text": "Ввeдите кoд из SMS для проверки счёта.",
+      "authoredWarning": true,
+      "note": "Latin e/o within Cyrillic words can evade the literal patterns.",
+      "score": 0,
+      "actualWarning": false,
+      "outcome": "fn",
+      "signals": []
+    },
+    {
+      "id": "ip-only",
+      "language": "url",
+      "channel": "url",
+      "text": "https://192.0.2.10/verify",
+      "authoredWarning": true,
+      "note": "Author flags the address for investigation; the IP rule alone can remain below the warning threshold.",
+      "score": 25,
+      "actualWarning": false,
+      "outcome": "fn",
+      "signals": [
+        "ip_host"
+      ]
+    }
+  ],
+  "falseAlerts": [
+    "quoted-warning",
+    "coupon-code"
+  ],
+  "misses": [
+    "implicit-request",
+    "mixed-script-obfuscation",
+    "ip-only"
+  ]
+}
