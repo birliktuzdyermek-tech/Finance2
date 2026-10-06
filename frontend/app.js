@@ -4,7 +4,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const I=window.QalqanI18n, E=window.QalqanEngine, Store=window.QalqanStore;
 let mode='single', incident='received';
 I.capture();
-const names = {home:'Главная',result:'Результат проверки',brand:'Проверка бренда',schemes:'Типы схем',guide:'Первый визит',glossary:'Словарь',presentation:'Презентация',states:'Помощь при ошибке',demo:'Демо для жюри',analyzer:'Анализатор',batch:'Пакетная проверка',dashboard:'Обзор угроз',history:'История проверок',compare:'Сравнение',research:'Архив эксперимента',account:'Аккаунт',privacy:'Данные и приватность',settings:'О проекте'};
+const names = {scenarios:'Сценарии',home:'Главная',result:'Результат проверки',brand:'Проверка бренда',schemes:'Типы схем',guide:'Первый визит',glossary:'Словарь',presentation:'Презентация',states:'Помощь при ошибке',demo:'Демо для жюри',analyzer:'Анализатор',batch:'Пакетная проверка',dashboard:'Обзор угроз',history:'История проверок',compare:'Сравнение',research:'Архив эксперимента',account:'Аккаунт',privacy:'Данные и приватность',settings:'О проекте'};
 const verdicts = {low:'Низкий риск',suspicious:'Подозрительно',high:'Высокий риск'};
 const channels = {sms:'SMS',whatsapp:'WhatsApp',email:'Email',url:'Ссылка'};
 let channel='sms', historyItems=[], busy=false, toastTimer, routeVersion=0;
@@ -137,10 +137,11 @@ async function research(version) {
 async function route() {
   const value=location.hash.slice(1),view=names[value]?value:'home',version=++routeVersion;
   if(value&&!names[value])history.replaceState(null,'',location.pathname+location.search+'#home');
-  if(document.body.classList.contains('projector-mode')&&!['result','presentation'].includes(view))setProjector(false);
+  if(document.body.classList.contains('projector-mode')&&!['result','presentation','scenarios'].includes(view))setProjector(false);
   if(currentView!==view){window.scrollTo(0,0);currentView=view;}
   $$('.view').forEach(s=>{s.hidden=s.id!=='view-'+view;});$$('[data-view]').forEach(a=>{a.classList.toggle('active',a.dataset.view===(view==='result'?'analyzer':view));a.setAttribute('aria-current',a.dataset.view===(view==='result'?'analyzer':view)?'page':'false');});$('#page-name').textContent=names[view];
   closeNavigation();
+  window.QalqanScenarioView.onRoute(view);
   if(view==='history')empty($('#history-list'),'Загружаем историю…');if(view==='compare'){empty($('#compare-results'),'Загружаем проверки…');$('#compare-hint').textContent='';}
   try {if(view==='dashboard')await dashboard(version);if(view==='history'||view==='compare'){const d=await api('history');if(version===routeVersion){historyItems=d.items;for(const id of selectedChecks)if(!historyItems.some(i=>i.id===id))selectedChecks.delete(id);if(view==='history')renderHistory();else prepareComparison();}}if(view==='research')await research(version);if(view==='presentation')await presentationMetrics(version);if(view==='schemes')renderSchemes();if(view==='account')await refreshAccount(version);}catch(e){if(version!==routeVersion)return;if(view==='history')empty($('#history-list'),'Не удалось загрузить историю. Попробуйте открыть раздел ещё раз.');if(view==='compare')empty($('#compare-results'),'Не удалось загрузить проверки.');toast(e.message||'API недоступен.');}
 }
@@ -234,7 +235,7 @@ $('#download-report').addEventListener('click',e=>{e.preventDefault();printResul
 $('#preview-download').addEventListener('click',e=>{e.preventDefault();printResult();});
 $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;$$('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));$('#dialogue-hint').hidden=mode!=='dialogue';setChannel(channel);}));
 $$('[data-language]').forEach(b=>b.addEventListener('click',()=>{I.set(b.dataset.language);$$('[data-language]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));setChannel(channel);actionPlan(incident);if(activeResult)renderResult(activeResult);if($('#report-preview').open){$('#report-preview').close();renderPreview();}route();}));
-function setProjector(on){document.body.classList.toggle('projector-mode',on);$('#projector-exit').hidden=!on;$$('#result-projector,#presentation-projector').forEach(b=>b.setAttribute('aria-pressed',String(on)));if(on){closeNavigation();window.scrollTo(0,0);$('#projector-exit').focus();}}
+function setProjector(on){document.body.classList.toggle('projector-mode',on);$('#projector-exit').hidden=!on;$$('#result-projector,#presentation-projector,#scenario-projector').forEach(b=>b.setAttribute('aria-pressed',String(on)));if(on){closeNavigation();window.scrollTo(0,0);$('#projector-exit').focus();}}
 $('#result-projector').addEventListener('click',()=>setProjector(!document.body.classList.contains('projector-mode')));
 $('#presentation-projector').addEventListener('click',()=>setProjector(!document.body.classList.contains('projector-mode')));
 $('#projector-exit').addEventListener('click',()=>setProjector(false));
@@ -283,6 +284,13 @@ async function presentationMetrics(version){showPresentation();try{const d=await
 async function checkConnection(){const health=await api('health');$('#connection-status').textContent=I.t('Локальная обработка');$('#api-dot').classList.remove('offline');$('#api-dot').classList.add('online');if(health.history_persistence==='ephemeral')$('#history-retention').textContent='До 200 результатов. История в демо временная и может исчезнуть при перезапуске сервиса. Сохраните нужные PDF.';return health;}
 $('#connection-retry').addEventListener('click',async()=>{$('#connection-retry').disabled=true;$('#connection-retry-status').textContent='Проверяем соединение…';try{await checkConnection();$('#connection-retry-status').textContent='Сервис доступен. Можно вернуться к анализатору.';}catch(e){$('#connection-retry-status').textContent=e.message;}finally{$('#connection-retry').disabled=false;}});
 
+window.QalqanScenarioView.init({
+  openResult(result) {
+    const saved = Store.request('analyze', {body: JSON.stringify({content: result.text, channel: result.channel, mode: result.replies ? 'dialogue' : 'single'})});
+    renderResult(saved); location.hash = 'result';
+  },
+  projector() { setProjector(!document.body.classList.contains('projector-mode')); }
+});
 window.addEventListener('hashchange',route);
 (async()=>{
   try{
