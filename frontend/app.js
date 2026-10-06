@@ -4,7 +4,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const I=window.QalqanI18n, E=window.QalqanEngine, Store=window.QalqanStore;
 let mode='single', incident='received';
 I.capture();
-const names = {scenarios:'Сценарии',home:'Главная',result:'Результат проверки',brand:'Проверка бренда',schemes:'Типы схем',guide:'Первый визит',glossary:'Словарь',presentation:'Презентация',states:'Помощь при ошибке',demo:'Демо для жюри',analyzer:'Анализатор',batch:'Пакетная проверка',dashboard:'Обзор угроз',history:'История проверок',compare:'Сравнение',research:'Архив эксперимента',account:'Аккаунт',privacy:'Данные и приватность',settings:'О проекте'};
+const names = {whatif:'Что изменится?',scenarios:'Сценарии',home:'Главная',result:'Результат проверки',brand:'Проверка бренда',schemes:'Типы схем',guide:'Первый визит',glossary:'Словарь',presentation:'Презентация',states:'Помощь при ошибке',demo:'Демо для жюри',analyzer:'Анализатор',batch:'Пакетная проверка',dashboard:'Обзор угроз',history:'История проверок',compare:'Сравнение',research:'Архив эксперимента',account:'Аккаунт',privacy:'Данные и приватность',settings:'О проекте'};
 const verdicts = {low:'Низкий риск',suspicious:'Подозрительно',high:'Высокий риск'};
 const channels = {sms:'SMS',whatsapp:'WhatsApp',email:'Email',url:'Ссылка'};
 let channel='sms', historyItems=[], busy=false, toastTimer, routeVersion=0;
@@ -40,6 +40,9 @@ function renderResult(r,sourceText="") {
   $('#rules-score').textContent=r.rules_score+' / 100';$('#ml-score').textContent=I.t('В браузере');$('#duration').textContent=r.duration_ms+' мс';
   $('#signals').replaceChildren(...r.signals.map(s=>{const row=node('div',null,'signal-row');row.append(node('span',s.source==='url'?'⌁':'◷'),node('span',s.title),node('span','+'+s.weight,'signal-weight'));return row;}));
   if(!r.signals.length)$('#signals').append(node('p','Явных признаков не найдено. Это не гарантия безопасности.','card-description'));
+  $('#result-score-explanation').textContent=window.QalqanEvidence.summary(r);
+  $('#result-analysis-limit').textContent=window.QalqanEvidence.limits();
+  $('#result-analyzer-version').textContent=I.t('Браузерный анализатор')+': '+r.analyzer_version;
   $('#url-results').replaceChildren(...r.urls.map(u=>node('div',u.host+' · '+I.t(u.official?'Подлинность не подтверждена':'Домен вне демонстрационного списка'),'url-row')));
   $('#advice').textContent=r.advice;$('#download-report').href='#result';
   $('#scheme-label').textContent=I.t('Предполагаемая схема')+': '+I.t(r.scheme?.title||'Тип схемы не определён');
@@ -142,6 +145,7 @@ async function route() {
   $$('.view').forEach(s=>{s.hidden=s.id!=='view-'+view;});$$('[data-view]').forEach(a=>{a.classList.toggle('active',a.dataset.view===(view==='result'?'analyzer':view));a.setAttribute('aria-current',a.dataset.view===(view==='result'?'analyzer':view)?'page':'false');});$('#page-name').textContent=names[view];
   closeNavigation();
   window.QalqanScenarioView.onRoute(view);
+  window.QalqanWhatIf.onRoute(view);
   if(view==='history')empty($('#history-list'),'Загружаем историю…');if(view==='compare'){empty($('#compare-results'),'Загружаем проверки…');$('#compare-hint').textContent='';}
   try {if(view==='dashboard')await dashboard(version);if(view==='history'||view==='compare'){const d=await api('history');if(version===routeVersion){historyItems=d.items;for(const id of selectedChecks)if(!historyItems.some(i=>i.id===id))selectedChecks.delete(id);if(view==='history')renderHistory();else prepareComparison();}}if(view==='research')await research(version);if(view==='presentation')await presentationMetrics(version);if(view==='schemes')renderSchemes();if(view==='account')await refreshAccount(version);}catch(e){if(version!==routeVersion)return;if(view==='history')empty($('#history-list'),'Не удалось загрузить историю. Попробуйте открыть раздел ещё раз.');if(view==='compare')empty($('#compare-results'),'Не удалось загрузить проверки.');toast(e.message||'API недоступен.');}
 }
@@ -161,7 +165,7 @@ function setAuthBusy(value){authBusy=value;$$('#account-send,#account-confirm,#a
 $('#account-start').addEventListener('submit',async e=>{e.preventDefault();if(authBusy||busy)return;setAuthBusy(true);$('#account-error').hidden=true;$('#account-status').textContent='Отправляем письмо…';try{const r=await api('auth/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('#account-email').value,consent:$('#account-consent').checked})});authChallenge=r.challenge_id;$('#account-start').hidden=true;$('#account-verify').hidden=false;$('#account-status').textContent=r.message;$('#email-code').focus();}catch(e){authError(e.message);$('#account-status').textContent='Письмо не отправлено.';}finally{setAuthBusy(false);}});
 $('#account-restart').addEventListener('click',()=>{authChallenge=null;$('#account-start').hidden=false;$('#account-verify').hidden=true;$('#email-code').value='';$('#account-status').textContent='';$('#account-error').hidden=true;refreshAccount().catch(e=>authError(e.message));});
 $('#account-verify').addEventListener('submit',async e=>{e.preventDefault();if(authBusy||busy||!authChallenge)return;setAuthBusy(true);$('#account-error').hidden=true;try{const p=await api('auth/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({challenge_id:authChallenge,email_code:$('#email-code').value})});showAccount(p);$('#email-code').value='';$('#account-status').textContent='Почта подтверждена. Вы вошли в аккаунт.';toast('Вход выполнен. Локальная история остаётся в этой вкладке.');}catch(e){authError(e.message);}finally{setAuthBusy(false);}});
-function clearPrivateViews(){Store.request('history',{method:'DELETE'});activeResultId=null;activeResult=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();if($('#report-preview').open)$('#report-preview').close();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';$('#batch-output').hidden=true;$('#batch-status').textContent='';$('#compare-results').replaceChildren();$('#dashboard-stats').replaceChildren();$('#recent-checks').replaceChildren();renderHistory();}
+function clearPrivateViews(){window.QalqanWhatIf.clear();Store.request('history',{method:'DELETE'});activeResultId=null;activeResult=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();if($('#report-preview').open)$('#report-preview').close();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';$('#batch-output').hidden=true;$('#batch-status').textContent='';$('#compare-results').replaceChildren();$('#dashboard-stats').replaceChildren();$('#recent-checks').replaceChildren();renderHistory();}
 async function leaveAccount(remove){if(authBusy||busy)return;if(remove&&!window.confirm('Удалить аккаунт, контакты и все его проверки? Это действие нельзя отменить.'))return;setAuthBusy(true);$('#account-error').hidden=true;try{await api(remove?'auth/account':'auth/logout',{method:remove?'DELETE':'POST'});clearPrivateViews();$('#account-status').textContent=remove?'Аккаунт и история удалены.':'Вы вышли из аккаунта.';await refreshAccount();}catch(e){authError(e.message);}finally{setAuthBusy(false);}}
 $('#account-logout').addEventListener('click',()=>leaveAccount(false));$('#account-delete').addEventListener('click',()=>leaveAccount(true));
 $$('[data-channel]').forEach(b=>b.addEventListener('click',()=>setChannel(b.dataset.channel)));
@@ -209,26 +213,12 @@ $('#compare-open').addEventListener('click',()=>{if(selectedChecks.size===2)loca
 $$('#compare-left,#compare-right').forEach(s=>s.addEventListener('change',()=>{selectedChecks.clear();for(const side of ['left','right'])if($('#compare-'+side).value)selectedChecks.add($('#compare-'+side).value);renderComparison();}));
 $('#clear-history').addEventListener('click',async()=>{
   if(!historyItems.length){toast('История уже пустая.');return;}if(!window.confirm('Удалить результаты и PDF-отчёты текущей сессии?'))return;
-  try{await api('history',{method:'DELETE'});activeResult=null;activeResultId=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;renderHistory();$('#batch-output').hidden=true;$('#compare-results').replaceChildren();$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';toast('История удалена.');}catch(e){toast(e.message);}
+  try{await api('history',{method:'DELETE'});window.QalqanWhatIf.clear();activeResult=null;activeResultId=null;activeSourceText='';$('#result-message').replaceChildren();$('#report-paper').replaceChildren();$('#brand-results').hidden=true;historyItems=[];selectedChecks.clear();historyPage=1;renderHistory();$('#batch-output').hidden=true;$('#compare-results').replaceChildren();$('#result-content').hidden=true;$('#result-empty').hidden=false;$('#result-status').textContent='Ожидает проверки';toast('История удалена.');}catch(e){toast(e.message);}
 });
-function evidenceCard(r,index){
-  const card=node('section',null,'evidence-card');
-  if(index!==null)card.append(node('h3',I.t('Реплика')+' '+(index+1)+' · '+I.t(verdicts[r.verdict])+' · '+r.score+' / 100'));
-  const original=node('div',null,'marked-message');
-  for(const segment of E.segments(r.text,r.signals)){
-    if(!segment.codes.length){original.append(document.createTextNode(segment.text));continue;}
-    const mark=document.createElement('mark');mark.textContent=segment.text;mark.title=segment.codes.map(I.rule).join('; ');original.append(mark);
-  }
-  card.append(original);
-  if(r.signals.length){const list=node('ul',null,'evidence-list');card.append(node('h4','Точные фрагменты и причины'));
-    for(const signal of r.signals)for(const match of signal.matches){const li=node('li'),q=document.createElement('q');q.textContent=match.text;li.append(q,document.createTextNode(' — '+I.rule(signal.code)));list.append(li);}card.append(list);
-  }else card.append(node('p','Явных признаков не найдено. Это не гарантия безопасности.','card-description'));
-  return card;
-}
 function renderAnnotatedText(text,result){
   $('#result-source-note').textContent=I.t(result.mode==='dialogue'?'Диалог':channels[result.channel])+' · '+new Date(result.created_at).toLocaleString(I.locale());
   $('#dialogue-summary').hidden=result.mode!=='dialogue';
-  $('#result-message').replaceChildren(...(result.replies?result.replies.map((r,i)=>evidenceCard(r,i)):[evidenceCard(result,null)]));
+  $('#result-message').replaceChildren(window.QalqanEvidence.render(result));
 }
 function printResult(r=activeResult){if(!r)return;if($('#report-preview').open)$('#report-preview').close();renderResult(r);location.hash='result';route();window.print();}
 $('#download-report').addEventListener('click',e=>{e.preventDefault();printResult();});
@@ -247,6 +237,7 @@ function renderPreview(){
   paper.append(node('hr'),node('h3','Что делать?'),node('p',r.advice),node('p','Предполагаемая схема: '+(r.scheme?.title||'Не определена')));
   paper.append(node('hr'),node('h3','Ограничения'));r.limitations.forEach(t=>paper.append(node('p',t,'report-caption')));
   paper.append(node('p','Отчёт сформирован локально. ID: '+r.id,'report-caption'));
+  paper.append(node('p',I.t('Браузерный анализатор')+': '+r.analyzer_version,'report-caption'),node('p',window.QalqanEvidence.summary(r),'report-caption'),node('p',window.QalqanEvidence.limits(),'report-caption'));
   $('#preview-download').href='#result';$('#report-preview').showModal();
 }
 $('#preview-report').addEventListener('click',renderPreview);
@@ -284,6 +275,8 @@ async function presentationMetrics(version){showPresentation();try{const d=await
 async function checkConnection(){const health=await api('health');$('#connection-status').textContent=I.t('Локальная обработка');$('#api-dot').classList.remove('offline');$('#api-dot').classList.add('online');if(health.history_persistence==='ephemeral')$('#history-retention').textContent='До 200 результатов. История в демо временная и может исчезнуть при перезапуске сервиса. Сохраните нужные PDF.';return health;}
 $('#connection-retry').addEventListener('click',async()=>{$('#connection-retry').disabled=true;$('#connection-retry-status').textContent='Проверяем соединение…';try{await checkConnection();$('#connection-retry-status').textContent='Сервис доступен. Можно вернуться к анализатору.';}catch(e){$('#connection-retry-status').textContent=e.message;}finally{$('#connection-retry').disabled=false;}});
 
+window.QalqanWhatIf.init({openOriginal(result) {renderResult(result);location.hash='result';}});
+$('#result-whatif').addEventListener('click',()=>{if(activeResult)window.QalqanWhatIf.open(activeResult);});
 window.QalqanScenarioView.init({
   openResult(result) {
     const saved = Store.request('analyze', {body: JSON.stringify({content: result.text, channel: result.channel, mode: result.replies ? 'dialogue' : 'single'})});
