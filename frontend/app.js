@@ -136,6 +136,7 @@ async function research(version) {
 }
 async function route() {
   const value=location.hash.slice(1),view=names[value]?value:'home',version=++routeVersion;
+  if(value&&!names[value])history.replaceState(null,'',location.pathname+location.search+'#home');
   if(document.body.classList.contains('projector-mode')&&!['result','presentation'].includes(view))setProjector(false);
   if(currentView!==view){window.scrollTo(0,0);currentView=view;}
   $$('.view').forEach(s=>{s.hidden=s.id!=='view-'+view;});$$('[data-view]').forEach(a=>{a.classList.toggle('active',a.dataset.view===(view==='result'?'analyzer':view));a.setAttribute('aria-current',a.dataset.view===(view==='result'?'analyzer':view)?'page':'false');});$('#page-name').textContent=names[view];
