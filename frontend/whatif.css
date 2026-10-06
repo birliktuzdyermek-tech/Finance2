@@ -1,0 +1,22 @@
+.whatif-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; align-items:start; }
+.whatif-grid > *, .whatif-diff > * { min-width:0; }
+.whatif-grid h2, .whatif-diff h3 { margin-top:0; }
+.whatif-grid h2 label { font:inherit; color:inherit; }
+.whatif-score-row { display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin:14px 0; }
+.whatif-score { font-size:30px; font-variant-numeric:tabular-nums; }
+#whatif-input { width:100%; min-height:220px; margin:10px 0; line-height:1.7; resize:vertical; }
+.whatif-editor-tools { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; }
+#whatif-results { margin-top:20px; }
+#whatif-delta { font-size:24px; margin:18px 0; }
+.whatif-diff { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; padding-top:20px; border-top:1px solid var(--line); }
+.whatif-diff ul { padding-left:20px; margin-bottom:0; overflow-wrap:anywhere; }
+.whatif-diff li + li { margin-top:18px; }
+.whatif-match { font-size:13px; line-height:1.8; }
+.whatif-match q { color:#fff1b6; white-space:pre-wrap; }
+.whatif-notice { padding:14px 18px; border-left:3px solid var(--cyan); background:var(--surface); color:var(--muted); line-height:1.7; }
+#whatif-content > .whatif-notice { margin:24px 0; }
+.evidence-list > li { margin:14px 0; }
+.evidence-list > li > p { margin:5px 0; }
+#result-score-explanation, #result-analysis-limit { line-height:1.7; }
+@media(max-width:900px) { .whatif-grid, .whatif-diff { grid-template-columns:1fr; } }
+@media(max-width:520px) { .whatif-editor-tools > * { width:100%; } .whatif-score { font-size:26px; } }

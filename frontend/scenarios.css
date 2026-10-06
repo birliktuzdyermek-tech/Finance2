@@ -1,0 +1,36 @@
+.scenario-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; }
+.scenario-toolbar label { display: grid; gap: 8px; min-width: 250px; flex: 1; }
+.scenario-toolbar select { width: 100%; }
+.scenario-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.scenario-progress-row { display: flex; align-items: center; gap: 18px; margin-top: 22px; }
+.scenario-progress-row progress { flex: 1; width: 100%; accent-color: #7bb4ff; }
+#scenario-position { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.scenario-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; margin: 24px 0; }
+.scenario-grid > .card { min-width: 0; }
+.scenario-turn { border-top: 1px solid var(--line, #27354a); padding: 20px 0 8px; }
+.scenario-turn h3 { font-size: 14px; color: var(--text-secondary, #b3c0d5); line-height: 1.5; }
+.scenario-turn-rules { padding-left: 20px; font-size: 14px; line-height: 1.7; color: #bacbe4; }
+#scenario-score { display: block; margin: 18px 0 12px; font-size: 48px; font-variant-numeric: tabular-nums; }
+#scenario-verdict::before { content: none; }
+.scenario-signal-list { padding: 0; list-style: none; }
+.scenario-signal-list li { display: flex; gap: 18px; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #27354a; line-height: 1.5; }
+.scenario-signal-list strong { flex-shrink: 0; color: #b9d7ff; }
+.scenario-limits { border-left: 3px solid #dfbc70; padding-left: 14px; color: #decda9; font-size: 14px; line-height: 1.6; }
+.scenario-journal { display: flex; flex-wrap: wrap; gap: 12px; }
+.scenario-journal [aria-pressed=true] { border-color: #82b8ff; background: #1c3353; }
+#scenario-author { margin-top: 22px; }
+#scenario-author summary { cursor: pointer; line-height: 1.6; }
+#scenario-status { min-height: 20px; }
+#view-scenarios .marked-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+#scenario-new-signals { min-height: 32px; }
+.projector-mode #view-scenarios .scenario-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.projector-mode #view-scenarios .marked-message, .projector-mode #view-scenarios .scenario-signal-list { font-size: 24px; }
+.projector-mode #view-scenarios #scenario-score { font-size: 68px; }
+@media (max-width: 850px) {
+  .scenario-grid, .projector-mode #view-scenarios .scenario-grid { grid-template-columns: 1fr; }
+  .scenario-toolbar label { min-width: 0; width: 100%; }
+  .scenario-controls button { flex: 1 1 40%; padding: 12px; }
+  #scenario-score { font-size: 38px; }
+  .scenario-journal button { flex: 1 1 40%; }
+  .projector-mode #view-scenarios .marked-message, .projector-mode #view-scenarios .scenario-signal-list { font-size: 18px; }
+}

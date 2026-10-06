@@ -77,7 +77,8 @@ def main():
             page.locator("#analyze-button").click()
             expect(page.locator("#risk-score")).to_have_text("0")
             expect(page.locator(".marked-message mark")).to_have_count(0)
-            expect(page.locator('[data-action="transferred"]')).to_have_attribute("aria-pressed", "true")
+            # Each new check starts with its own situation; previous choices stay with their record.
+            expect(page.locator('[data-action="received"]')).to_have_attribute("aria-pressed", "true")
 
         def unexpected(dialog):
             unexpected_dialogs.append(dialog.message)

@@ -2,6 +2,7 @@
  * offsets into the original input, not a normalized/lowercased copy. */
 (function (root) {
   'use strict';
+  const version = 'browser-rules-1.0';
   const domains = ['kaspi.kz', 'halykbank.kz', 'homebank.kz', 'bcc.kz', 'forte.kz', 'bankffin.kz', 'jusan.kz', 'egov.kz', 'post.kz', 'airastana.com'];
   const brandNames = [...domains.map(domain=>domain.split('.')[0]),'freedom','halyk','kazpost'];
   const shorteners = new Set(['bit.ly', 'tinyurl.com', 't.co', 'clck.ru', 'cutt.ly']);
@@ -96,7 +97,7 @@
       if(host.split('.').length>4)flag('subdomains');
     }
     const signals=[...found.values()],score=Math.min(100,signals.reduce((sum,s)=>sum+s.weight,0));
-    return {text,channel,score,rules_score:score,verdict:verdict(score),signals,urls};
+    return {analyzer_version:version,text,channel,score,rules_score:score,verdict:verdict(score),signals,urls};
   }
   function splitDialogue(text) {
     if(typeof text!=='string'||text.length>10000)throw new RangeError('content_length');
@@ -112,7 +113,7 @@
       byCode.get(signal.code).replies.push(index+1);
     }));
     const signals=[...byCode.values()],score=Math.min(100,signals.reduce((sum,s)=>sum+s.weight,0));
-    return {mode:'dialogue',text,channel,score,rules_score:score,verdict:verdict(score),signals,replies,urls:replies.flatMap(r=>r.urls)};
+    return {analyzer_version:version,mode:'dialogue',text,channel,score,rules_score:score,verdict:verdict(score),signals,replies,urls:replies.flatMap(r=>r.urls)};
   }
   // Split overlap at every evidence boundary: one character is rendered once.
   function segments(text,signals) {
@@ -120,7 +121,7 @@
     const points=[...new Set([0,text.length,...spans.flatMap(s=>[s.start,s.end])])].sort((a,b)=>a-b);
     return points.slice(0,-1).map((start,i)=>({text:text.slice(start,points[i+1]),start,end:points[i+1],codes:[...new Set(spans.filter(s=>s.start<=start&&s.end>=points[i+1]).map(s=>s.code))]}));
   }
-  const api={analyze,analyzeDialogue,splitDialogue,segments,weights};
+  const api={version,analyze,analyzeDialogue,splitDialogue,segments,weights};
   if(typeof module==='object' && module.exports)module.exports=api;
   else root.QalqanEngine=api;
 })(typeof globalThis==='object'?globalThis:this);
