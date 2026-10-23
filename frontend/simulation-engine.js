@@ -2,6 +2,7 @@
 (function(root) {
   'use strict';
   const E = typeof module === 'object' && module.exports ? require('./analyzer.js') : root.QalqanEngine;
+  const L = typeof module === 'object' && module.exports ? require('./simulation-lessons.js') : root.QalqanSimulationLessons;
   const stories = [
     {id:'blocked-card',number:'01',channel:'sms',intent:'code',
       title:{ru:'Карта заблокирована',kk:'Карта бұғатталды'},
@@ -28,33 +29,65 @@
   stories.forEach(freeze);Object.freeze(stories);
   function createSession(id) {
     const story=stories.find(s=>s.id===id);if(!story)throw new RangeError('simulation_story');
-    let state=freeze({phase:'notification',incident:'received',analyzed:false,ending:null,journal:[]});
+    let state=freeze({phase:'notification',incident:'received',analyzed:false,ending:null,journal:[],trace:[],node:'start',transcript:[],inspection:{open:false,selection:null,checked:false,correct:null}});
+    function input(){
+      const incoming=state.transcript.filter(item=>item.role==='sender');
+      return {content:incoming.map(item=>item.text).join('\n\n'),channel:story.channel,mode:incoming.length>1?'dialogue':'single'};
+    }
+    function result(){
+      if(!state.analyzed)return null;
+      const source=input();return source.mode==='dialogue'?E.analyzeDialogue(source.content,source.channel):E.analyze(source.content,source.channel);
+    }
+    function commit(next,action,details={}){
+      const entry={action,before:state.incident,after:next.incident,replyCount:next.transcript.filter(item=>item.role==='sender').length,...details};
+      state=freeze({...next,journal:[...state.journal,action],trace:[...state.trace,entry]});return state;
+    }
     function options(){
       if(state.phase==='notification')return ['open_phone'];
       const list=state.analyzed?[]:['analyze'];
-      if(state.phase==='message')list.push(...(story.url?['open_link']:[]),'contact','ignore');
+      if(state.phase==='message')list.push(...(story.url&&!state.inspection.open?['inspect_link']:[]),...Object.keys(L.dialogues[id][state.node].options),...(story.url?['open_link']:[]),'contact','ignore');
       if(state.phase==='page')list.push(story.intent==='code'?'send_demo':'transfer_demo','contact','ignore');
       return list;
     }
     return {
-      story,get state(){return state;},options,
-      act(action){
+      story,get state(){return state;},options,input,result,
+      parts(){return L.parts[id];},
+      choosePart(part){
+        if(!state.inspection.open||state.inspection.checked||state.phase==='outcome'||!L.parts[id].some(p=>p.id===part))throw new RangeError('simulation_part');
+        state=freeze({...state,inspection:{...state.inspection,selection:part}});return state;
+      },
+      checkPart(){
+        if(!state.inspection.open||state.inspection.checked||!state.inspection.selection||state.phase==='outcome')throw new RangeError('simulation_inspection');
+        const inspection={...state.inspection,checked:true,correct:state.inspection.selection==='domain'};
+        return commit({...state,inspection},'check_link',{selection:inspection.selection,correct:inspection.correct});
+      },
+      act(action,language='ru'){
         if(!options().includes(action))throw new RangeError('simulation_action');
-        const next={...state,journal:[...state.journal,action]};
-        if(action==='open_phone')next.phase='message';
+        const next={...state},details={};
+        if(action==='open_phone'){next.phase='message';next.transcript=[{role:'sender',text:story.message,node:'start'}];}
         if(action==='analyze')next.analyzed=true;
+        if(action==='inspect_link')next.inspection={...state.inspection,open:true};
+        const destination=L.dialogues[id][state.node].options[action];
+        if(destination){
+          const utterance=L.choices[action][language==='kk'?'kk':'ru'],reply=L.dialogues[id][destination].text;
+          next.node=destination;next.analyzed=false;
+          next.transcript=[...state.transcript,{role:'user',text:utterance},{role:'sender',text:reply,node:destination}];
+          Object.assign(details,{from:state.node,to:destination,utterance,reply});
+        }
         if(action==='open_link'){next.phase='page';next.incident='opened';}
         if(['send_demo','transfer_demo','contact','ignore'].includes(action)){
           next.phase='outcome';next.ending=action;
           if(action==='send_demo')next.incident='entered';
           if(action==='transfer_demo')next.incident='transferred';
         }
-        state=freeze(next);return state;
-      },
-      // Only the original message and source channel are evaluated, never the story labels or choices.
-      result(){return state.analyzed?E.analyze(story.message,story.channel):null;}
+        if(action==='analyze'){
+          const source=input(),analysis=source.mode==='dialogue'?E.analyzeDialogue(source.content,source.channel):E.analyze(source.content,source.channel);
+          details.analysis={score:analysis.score,codes:analysis.signals.map(s=>s.code)};
+        }
+        return commit(next,action,details);
+      }
     };
   }
-  const api={version:'simulation-1.0',stories,createSession};
+  const api={version:'simulation-2.0',stories,createSession};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.QalqanSimulationEngine=api;
 })(typeof globalThis==='object'?globalThis:this);
