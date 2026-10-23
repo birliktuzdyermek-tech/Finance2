@@ -27,12 +27,15 @@ def main():
         page.on('request',lambda r:requests.append((r.method,r.url,r.post_data)))
         context.set_offline(True)
         canvas=page.locator('#sim-canvas')
-        # Camera controls must change actual rendered pixels; keyboard Home restores the view.
+        # Camera controls change rendered pixels and the phone projection. PNG bytes may
+        # differ across focus/compositing passes, so reset is verified by the projection.
         before=canvas.screenshot()
+        projection=page.locator('#sim-hotspot').evaluate('n=>[n.style.left,n.style.top]')
         page.locator('[data-sim-camera="left"]').click()
+        page.wait_for_function('p=>document.getElementById("sim-hotspot").style.left!==p[0]',arg=projection)
         assert canvas.screenshot()!=before
         canvas.focus();page.keyboard.press('Home')
-        assert canvas.screenshot()==before
+        page.wait_for_function('p=>{const n=document.getElementById("sim-hotspot");return n.style.left===p[0]&&n.style.top===p[1]}',arg=projection)
         rect=canvas.bounding_box();page.mouse.move(rect['x']+100,rect['y']+160)
         page.mouse.down();page.mouse.move(rect['x']+180,rect['y']+160);page.mouse.up()
         assert canvas.screenshot()!=before
