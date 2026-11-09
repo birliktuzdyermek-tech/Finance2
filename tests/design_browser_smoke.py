@@ -129,11 +129,11 @@ def main():
         expect(page.locator("#view-analyzer")).to_be_visible()
 
         route("presentation")
-        expect(page.locator(".presentation-slide")).to_have_count(14)
+        expect(page.locator(".presentation-slide")).to_have_count(17)
         expect(page.locator(".presentation-slide:not([hidden])")).to_have_count(1)
-        expect(page.locator("#presentation-counter")).to_have_text("1 / 14")
+        expect(page.locator("#presentation-counter")).to_have_text("1 / 17")
         page.locator("#presentation-next").click()
-        expect(page.locator("#presentation-counter")).to_have_text("2 / 14")
+        expect(page.locator("#presentation-counter")).to_have_text("2 / 17")
         expect(page.locator(".presentation-slide[data-slide='1'] img")).to_be_visible()
         assert page.evaluate("document.querySelector('.presentation-slide[data-slide=\"1\"] img').complete && document.querySelector('.presentation-slide[data-slide=\"1\"] img').naturalWidth > 0")
         expect(page.locator("#presentation-download")).to_have_attribute("href", "/static/presentation/Qalqan-pitch-deck.pptx")
@@ -143,7 +143,7 @@ def main():
         snapshot("presentation-projector")
         page.locator("#projector-exit").click()
         page.locator("#presentation-prev").click()
-        expect(page.locator("#presentation-counter")).to_have_text("1 / 14")
+        expect(page.locator("#presentation-counter")).to_have_text("1 / 17")
         expect(page.locator("body")).not_to_have_class(re.compile(r"\bprojector-mode\b"))
 
         route("states")
