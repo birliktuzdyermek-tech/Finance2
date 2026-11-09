@@ -198,6 +198,7 @@ window.QalqanSimulation = (() => {
     renderPhone();renderInspector();renderAnalysis();renderReview();renderMap();
     $('sim-journal-card').hidden=!s.journal.length||s.phase==='outcome';$('sim-journal').replaceChildren(...s.journal.map(a=>el('li',t(a))));
     scene?.setPhase(s.phase);
+    window.QalqanSimulationFx?.sync(session);
   }
   function init(options){
     callbacks=options;
@@ -210,12 +211,13 @@ window.QalqanSimulation = (() => {
     if(active){
       render();
       if(!scene)scene=window.QalqanSimulationScene.create($('sim-canvas'),{
-        project({x,y}){$('sim-hotspot').style.left=x+'%';$('sim-hotspot').style.top=y+'%';},
+        project({x,y}){$('sim-hotspot').style.left=x+'%';$('sim-hotspot').style.top=y+'%';const stage=$('sim-stage');stage.style.setProperty('--phone-x',x.toFixed(1)+'%');stage.style.setProperty('--phone-y',y.toFixed(1)+'%');},
         onAvailability(available){$('sim-stage').classList.toggle('sim-flat',!available);$('sim-fallback').hidden=available;document.querySelectorAll('[data-sim-camera]').forEach(n=>{n.disabled=!available;});if(!available){$('sim-hotspot').style.left='50%';$('sim-hotspot').style.top='53%';}}
       });
       scene.setPhase(session.state.phase);
     }
     scene?.setActive(active);
+    if(!active)window.QalqanSimulationFx?.stop();
   }
   return {init,onRoute,clear(){select(E.stories[0].id);}};
 })();
