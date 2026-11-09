@@ -4,8 +4,7 @@ window.QalqanSimulationFx = (() => {
   'use strict';
   const I = window.QalqanI18n;
   const pair = (ru, kk) => (I.language() === 'kk' ? kk : ru);
-  // Minutes shown on the learning timer, by story id. Stories without pressure show no timer.
-  const PRESSURE = { 'blocked-card': 10, 'safe-transfer': 15, 'qr-parking': 10, 'relative-transfer': 15, 'bank-call': 5, 'fake-job': 20 };
+  // Minutes shown on the learning timer come from story.pressure; stories without it show no timer.
   const timers = new WeakMap();
   let xrayOn = true, tick = 0, current = null;
 
@@ -23,7 +22,7 @@ window.QalqanSimulationFx = (() => {
   const elapsed = r => (r.start == null ? 0 : Math.floor(((r.end ?? performance.now()) - r.start) / 1000));
 
   function paintTimer(node, session) {
-    const minutes = PRESSURE[session.story.id], total = minutes * 60, r = record(session);
+    const minutes = session.story.pressure, total = minutes * 60, r = record(session);
     const left = Math.max(0, total - elapsed(r)), expired = left === 0;
     node.dataset.expired = String(expired);
     node.style.setProperty('--p', String(Math.round((left / total) * 100)));
@@ -40,8 +39,8 @@ window.QalqanSimulationFx = (() => {
     body.querySelectorAll('.sim-timer').forEach(n => n.remove());
     clearInterval(tick); tick = 0;
     const phase = session.state.phase;
-    if (!PRESSURE[session.story.id] || phase === 'notification') return;
-    const total = PRESSURE[session.story.id] * 60;
+    if (!session.story.pressure || phase === 'notification') return;
+    const total = session.story.pressure * 60;
     if (phase === 'outcome') {
       const spent = Math.min(elapsed(record(session)), total);
       const note = el('p', pair(`Решение принято за ${clock(spent)} из ${clock(total)}. Таймер не влиял на анализ.`, `Шешім ${clock(spent)} ішінде қабылданды (${clock(total)} ішінен). Таймер талдауға әсер еткен жоқ.`), 'sim-timer-note');
@@ -99,5 +98,5 @@ window.QalqanSimulationFx = (() => {
     syncXray(session, stage, session.result());
   }
   function stop() { clearInterval(tick); tick = 0; }
-  return { sync, stop, minutes: id => PRESSURE[id] || 0 };
+  return { sync, stop };
 })();
