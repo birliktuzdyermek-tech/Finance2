@@ -149,6 +149,8 @@ python -m scripts.evaluate_browser
 
 Чтобы получить PowerPoint и PDF-материалы, установите `pip install -r presentation/requirements.txt` и выполните `python presentation/build.py`. Они появятся в `artifacts/`.
 
+Слайды раздела `/#presentation` на сайте — картинки в `frontend/presentation/`. После изменения `deck.json` выполните `python presentation/build.py`, затем `python presentation/export_site.py` (нужны LibreOffice, poppler и Pillow) и закоммитьте обновлённые файлы.
+
 Для короткой записи демо без озвучки: установите Playwright (`pip install playwright`, `python -m playwright install chromium ffmpeg`), запустите приложение и выполните `python presentation/record_demo.py`. Видео сохранится в `artifacts/Qalqan-demo.webm`.
 
 `render.yaml` подготовлен для одной Python-реплики и Managed PostgreSQL на бесплатных демо-тарифах. Настройка `PUBLIC_ORIGIN` и ограничения free tier — в документации. Docker используется для локального развёртывания. Публичный сервис не создаётся самим наличием файла.
