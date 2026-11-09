@@ -129,3 +129,32 @@ test('decision map records the real order, selected replies and incident transit
   assert.equal(s.state.trace[7].replyCount,3);assert.ok(Object.isFrozen(s.state.trace[6]));
   const fresh=S.createSession('safe-transfer');assert.deepEqual(fresh.state.trace,[]);assert.deepEqual(fresh.state.transcript,[]);assert.equal(fresh.state.inspection.open,false);
 });
+
+test('simulator 3.0 has eight stories with the intended analyzer lessons',()=>{
+  assert.equal(S.version,'simulation-3.0');
+  assert.deepEqual(S.stories.map(s=>s.id),['blocked-card','safe-transfer','ordinary-receipt','qr-parking','relative-transfer','bank-call','marketplace-prepay','fake-job']);
+  assert.equal(new Set(S.stories.map(s=>s.number)).size,8);
+  const expected={'qr-parking':28,'relative-transfer':18,'bank-call':45,'marketplace-prepay':62,'fake-job':50};
+  for(const [id,score] of Object.entries(expected)){
+    const s=S.createSession(id);s.act('open_phone');s.act('analyze');assert.equal(s.result().score,score,id);
+  }
+  // The relative story is a deliberate analyzer limit: low index, yet the request is a money transfer.
+  assert.equal(S.createSession('relative-transfer').story.url,null);
+});
+test('direct stories ask for code or money in the chat itself, with no page',()=>{
+  for(const [id,action,incident] of [['relative-transfer','transfer_demo','transferred'],['bank-call','send_demo','entered']]){
+    const s=S.createSession(id);s.act('open_phone');
+    assert.equal(s.options().includes('open_link'),false);assert.equal(s.options().includes('inspect_link'),false);
+    assert.equal(s.options().includes(action),true);
+    s.act(action);assert.equal(s.state.incident,incident);assert.equal(s.state.phase,'outcome');assert.equal(s.state.ending,action);
+  }
+  // Stories with a page never allow the demo action before the page is opened.
+  const s=S.createSession('qr-parking');s.act('open_phone');assert.equal(s.options().includes('transfer_demo'),false);
+});
+test('every address breaks into exact parts and exactly one domain',()=>{
+  for(const story of S.stories.filter(s=>s.url)){
+    assert.equal(L.parts[story.id].map(p=>p.text).join(''),story.url,story.id);
+    assert.equal(L.parts[story.id].filter(p=>p.id==='domain').length,1,story.id);
+  }
+  for(const story of S.stories.filter(s=>!s.url))assert.deepEqual(L.parts[story.id],[],story.id);
+});

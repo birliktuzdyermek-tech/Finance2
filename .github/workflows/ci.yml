@@ -62,4 +62,5 @@ jobs:
           TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.simulation_browser
           TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.simulation_dialogue_browser
           TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.simulation_fx_browser
+          TEST_BASE_URL=http://127.0.0.1:8000 python -m tests.simulation_stories_browser
       - run: docker build -t qalqan-ci .
