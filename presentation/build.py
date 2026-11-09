@@ -8,6 +8,8 @@ from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN
+from pptx.oxml.ns import qn
+from lxml import etree
 from pptx.util import Inches, Pt
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -18,11 +20,13 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "artifacts"
-INK, CARD, CYAN, WHITE, MUTED = "0A1020", "121B2E", "31BDF2", "EDF1FA", "ADB9CE"
+INK, CARD, CYAN, WHITE, MUTED = "050914", "CARD", "22D3FF", "EDF1FF", "8EA0BF"
 
 
 FONT = "Arial"
-CARD2, MINT, AMBER, RED = "1A2540", "3DDC97", "F5B84B", "FF6B7A"
+CARD2, MINT, AMBER, RED, VIOLET = "CARD2", "3DDC97", "F5B84B", "FF4D6D", "8B5CF6"
+ASSETS = ROOT / "presentation" / "assets"
+MONO = "Courier New"
 TONES = {"risk": RED, "safe": MINT, "warn": AMBER, "info": CYAN}
 
 
@@ -48,25 +52,48 @@ def text(slide, value, x, y, width, height, size=18, color=WHITE, bold=False, al
     return box
 
 
-def shape(slide, x, y, width, height, color, kind=MSO_SHAPE.ROUNDED_RECTANGLE, radius=.08):
+def _alpha(color_parent, percent):
+    clr = color_parent[0]
+    alpha = etree.SubElement(clr, qn("a:alpha"))
+    alpha.set("val", str(int(percent * 1000)))
+
+
+def shape(slide, x, y, width, height, color, kind=MSO_SHAPE.ROUNDED_RECTANGLE, radius=.08, line=None):
     item = slide.shapes.add_shape(kind, Inches(x), Inches(y), Inches(width), Inches(height))
-    item.fill.solid()
-    item.fill.fore_color.rgb = RGBColor.from_string(color)
-    item.line.fill.background()
     item.shadow.inherit = False
+    glass = {CARD: 6, CARD2: 11}
+    item.fill.solid()
+    item.fill.fore_color.rgb = RGBColor.from_string("FFFFFF" if color in glass else color)
+    if color in glass:
+        _alpha(item._element.spPr.find(qn("a:solidFill")), glass[color])
+    if line:
+        item.line.color.rgb = RGBColor.from_string(line[0])
+        item.line.width = Pt(line[2] if len(line) > 2 else .9)
+        _alpha(item._element.spPr.find(qn("a:ln")).find(qn("a:solidFill")), line[1])
+    else:
+        item.line.fill.background()
     if kind == MSO_SHAPE.ROUNDED_RECTANGLE:
         item.adjustments[0] = radius
     return item
 
 
+def picture(slide, name, x, y, width=None, height=None):
+    kwargs = {}
+    if width is not None:
+        kwargs["width"] = Inches(width)
+    if height is not None:
+        kwargs["height"] = Inches(height)
+    return slide.shapes.add_picture(str(ASSETS / name), Inches(x), Inches(y), **kwargs)
+
+
 def card(slide, x, y, width, height, accent=CYAN, fill=CARD):
-    shape(slide, x, y, width, height, fill)
-    shape(slide, x + .22, y, min(.9, width - .44), .05, accent, MSO_SHAPE.RECTANGLE)
+    shape(slide, x, y, width, height, fill, radius=.06, line=(CYAN, 26, .9))
+    shape(slide, x + .25, y, min(.9, width - .5), .045, accent, MSO_SHAPE.RECTANGLE)
 
 
 def chip(slide, label, x, y, color=CYAN, size=12):
     width = .34 + len(label) * .105 * size / 12
-    shape(slide, x, y, width, .38, CARD2, radius=.5)
+    shape(slide, x, y, width, .38, CARD2, radius=.5, line=(color, 45, .9))
     text(slide, label, x, y + .095, width, .25, size, color, True, PP_ALIGN.CENTER)
     return width
 
@@ -74,14 +101,16 @@ def chip(slide, label, x, y, color=CYAN, size=12):
 def frame(slide, entry, index, total):
     slide.background.fill.solid()
     slide.background.fill.fore_color.rgb = RGBColor.from_string(INK)
-    shape(slide, 11.6, -1.0, 3.2, 3.2, "0F1A33", MSO_SHAPE.OVAL)
-    shape(slide, 12.4, -.4, 2.0, 2.0, CARD, MSO_SHAPE.OVAL)
-    shape(slide, 0, 0, .14, 7.5, CYAN, MSO_SHAPE.RECTANGLE)
+    slide.shapes.add_picture(str(ASSETS / "bg.jpg"), 0, 0, width=Inches(13.333), height=Inches(7.5))
     if entry["layout"] != "title":
-        text(slide, entry["kicker"], .75, .46, 10, .3, 12, CYAN, True)
+        shape(slide, .75, .44, len(entry["kicker"]) * .105 + .5, .36, CARD2, radius=.5, line=(CYAN, 55, .9))
+        text(slide, entry["kicker"], .75, .525, len(entry["kicker"]) * .105 + .5, .25, 11, CYAN, True, PP_ALIGN.CENTER)
+        shape(slide, 11.05, .53, .1, .1, MINT, MSO_SHAPE.OVAL)
+        text(slide, "LOCAL MODE", 11.25, .5, 1.5, .25, 10, MUTED, False)
         size = 30 if len(entry["title"]) < 58 else 26
-        text(slide, entry["title"], .75, .82, 11.2, 1.0, size, WHITE, True)
-    text(slide, "QALQAN FINANCE SECURITY  /  RESEARCH PROTOTYPE", .75, 7.06, 8, .22, 9, MUTED)
+        text(slide, entry["title"], .75, .98, 11.8, 0.9, size, WHITE, True)
+    picture(slide, "glyph-shield.png", .75, 6.98, height=.3)
+    text(slide, "QALQAN  /  RESEARCH PROTOTYPE", 1.15, 7.06, 8, .22, 9, MUTED)
     text(slide, f"{index:02d} / {total}", 11.6, 7.06, 1.2, .22, 10, CYAN, True, PP_ALIGN.RIGHT)
 
 
@@ -103,32 +132,39 @@ def highlighted(message, marks):
 
 
 def title_slide(slide, e):
-    text(slide, e["kicker"], .85, .9, 11, .3, 12, CYAN, True)
-    shape(slide, .85, 1.55, .95, 1.1, CYAN, MSO_SHAPE.PENTAGON if hasattr(MSO_SHAPE, "PENTAGON") else MSO_SHAPE.OVAL)
-    shape(slide, 1.0, 1.7, .65, .8, INK, MSO_SHAPE.OVAL)
-    text(slide, "Q", 1.0, 1.82, .65, .6, 30, CYAN, True, PP_ALIGN.CENTER)
-    text(slide, e["title"], 2.1, 1.5, 10.2, 1.0, 46, WHITE, True)
-    text(slide, e["subtitle"], 2.1, 2.55, 10, .9, 22, MUTED)
-    x = .85
-    for label in e["chips"]:
-        x += chip(slide, label, x, 4.0) + .18
-    shape(slide, .85, 5.15, 11.6, .015, CARD2, MSO_SHAPE.RECTANGLE)
-    text(slide, e["people"][0], .85, 5.4, 11, .3, 15, CYAN, True)
-    text(slide, "   ·   ".join(e["people"][1:]), .85, 5.85, 11.6, .35, 16, WHITE)
+    picture(slide, "radar.png", 7.35, .55, width=5.9)
+    shape(slide, .75, .85, len(e["kicker"]) * .098 + .5, .36, CARD2, radius=.5, line=(CYAN, 55, .9))
+    text(slide, e["kicker"], .75, .935, len(e["kicker"]) * .098 + .5, .25, 11, CYAN, True, PP_ALIGN.CENTER)
+    picture(slide, "icon-shield.png", .75, 1.65, height=1.25)
+    text(slide, [("Qalqan ", WHITE, True), ("Finance", CYAN, True)], 2.2, 1.55, 6.5, .9, 46, WHITE, True)
+    text(slide, "Security", 2.2, 2.35, 6.5, .9, 46, WHITE, True)
+    text(slide, e["subtitle"], .75, 3.5, 6.4, 1.2, 20, MUTED)
+    x, y = .75, 4.85
+    for label in e["chips"][:2]:
+        x += chip(slide, label, x, y, CYAN, 12) + .15
+    x = .75
+    for label in e["chips"][2:]:
+        x += chip(slide, label, x, y + .5, MINT, 12) + .15
+    shape(slide, .75, 5.95, 6.4, .012, CYAN, MSO_SHAPE.RECTANGLE)
+    text(slide, e["people"][0], .75, 6.15, 6.6, .3, 14, CYAN, True)
+    text(slide, "  \u00b7  ".join(e["people"][1:]), .75, 6.55, 12, .3, 13, WHITE)
 
 
 def problem_slide(slide, e):
     card(slide, .75, 2.0, 5.6, 4.1, AMBER)
-    text(slide, "ПРИМЕР СООБЩЕНИЯ", 1.05, 2.3, 4, .25, 11, MUTED, True)
-    shape(slide, 1.05, 2.8, 4.95, 2.1, CARD2, radius=.1)
+    text(slide, "INCOMING \u00b7 SMS", 1.05, 2.3, 4, .25, 11, MUTED, True)
+    text(slide, "\u25cf SCANNING", 4.7, 2.3, 1.4, .25, 10, CYAN, True, PP_ALIGN.RIGHT)
+    shape(slide, 1.05, 2.8, 4.95, 2.1, CARD2, radius=.08, line=(CYAN, 30, .9))
     text(slide, highlighted(e["message"], e["highlights"]), 1.3, 3.05, 4.45, 1.7, 19)
+    shape(slide, 3.55, 2.8, .035, 2.1, CYAN, MSO_SHAPE.RECTANGLE)
     text(slide, "Подсвечено то, на что реагируют правила.", 1.05, 5.25, 4.9, .6, 13, MUTED)
+    icons = ["lock", "target", "link", "scan"]
     for i, (head, body) in enumerate(e["cards"]):
         x, y = 6.75 + (i % 2) * 3.0, 2.0 + (i // 2) * 2.1
         card(slide, x, y, 2.85, 1.95, CYAN)
-        text(slide, f"{i+1:02d}", x + .25, y + .3, .6, .3, 13, CYAN, True)
-        text(slide, head, x + .25, y + .7, 2.4, .4, 16, WHITE, True)
-        text(slide, body, x + .25, y + 1.1, 2.4, .8, 12, MUTED)
+        picture(slide, f"icon-{icons[i]}.png", x + .2, y + .22, height=.7)
+        text(slide, head, x + .25, y + 1.0, 2.4, .4, 15, WHITE, True)
+        text(slide, body, x + .25, y + 1.38, 2.4, .55, 11, MUTED)
 
 
 def audience_slide(slide, e):
@@ -142,15 +178,16 @@ def audience_slide(slide, e):
 
 
 def flow_slide(slide, e):
+    icons = ["scan", "shield", "chart", "target"]
     for i, (num, head, body) in enumerate(e["steps"]):
         x = .75 + i * 3.05
-        card(slide, x, 2.2, 2.75, 3.3)
-        shape(slide, x + .3, 2.6, .62, .62, CYAN, MSO_SHAPE.OVAL)
-        text(slide, num, x + .3, 2.72, .62, .4, 18, INK, True, PP_ALIGN.CENTER)
-        text(slide, head, x + .3, 3.45, 2.2, .4, 20, WHITE, True)
-        text(slide, body, x + .3, 3.95, 2.2, 1.4, 13, MUTED)
+        card(slide, x, 2.2, 2.75, 3.3, [CYAN, VIOLET, MINT, AMBER][i])
+        picture(slide, f"icon-{icons[i]}.png", x + .25, 2.5, height=.85)
+        text(slide, f"0{num}", x + 1.9, 2.62, .6, .3, 13, MUTED, True, PP_ALIGN.RIGHT)
+        text(slide, head, x + .3, 3.55, 2.2, .4, 20, WHITE, True)
+        text(slide, body, x + .3, 4.05, 2.2, 1.35, 13, MUTED)
         if i < 3:
-            text(slide, "\u2192", x + 2.77, 3.65, .3, .4, 22, CYAN, True)
+            text(slide, "\u25b6", x + 2.8, 3.7, .3, .4, 13, CYAN, True)
     footer(slide, e["footer"], 5.95, WHITE)
 
 
@@ -171,12 +208,15 @@ def weights_slide(slide, e):
 
 
 def modules_slide(slide, e):
-    colors = [CYAN, MINT, AMBER, CYAN, MINT, AMBER]
+    colors = [CYAN, MINT, AMBER, VIOLET, CYAN, RED]
+    icons = ["scan", "flask", "target", "chat", "cube", "doc"]
     for i, (head, body) in enumerate(e["modules"]):
         x, y = .75 + (i % 3) * 4.0, 2.0 + (i // 3) * 2.35
         card(slide, x, y, 3.8, 2.15, colors[i])
-        text(slide, head, x + .3, y + .35, 3.3, .4, 19, WHITE, True)
-        text(slide, body, x + .3, y + .95, 3.25, 1.1, 13, MUTED)
+        picture(slide, f"icon-{icons[i]}.png", x + .25, y + .3, height=.8)
+        text(slide, f"0{i + 1}", x + 3.0, y + .4, .6, .3, 13, MUTED, True, PP_ALIGN.RIGHT)
+        text(slide, head, x + 1.2, y + .45, 2.5, .4, 18, WHITE, True)
+        text(slide, body, x + .3, y + 1.3, 3.25, .8, 12, MUTED)
 
 
 def demo_slide(slide, e):
@@ -184,11 +224,12 @@ def demo_slide(slide, e):
         tone = TONES[side["tone"]]
         card(slide, x, 1.95, 5.75, 4.55, tone)
         text(slide, side["label"], x + .3, 2.3, 3.5, .25, 11, tone, True)
-        text(slide, str(side["score"]), x + 3.9, 2.05, 1.6, .9, 54, tone, True, PP_ALIGN.RIGHT)
-        shape(slide, x + .3, 3.1, 5.15, 1.05, CARD2, radius=.1)
-        text(slide, side["text"], x + .5, 3.25, 4.75, .8, 12, WHITE)
+        shape(slide, x + 3.85, 2.05, 1.55, 1.0, tone, MSO_SHAPE.OVAL, line=(tone, 100, 3)).fill.background()
+        text(slide, str(side["score"]), x + 3.85, 2.2, 1.55, .7, 34, tone, True, PP_ALIGN.CENTER)
+        shape(slide, x + .3, 3.2, 5.15, 1.0, CARD2, radius=.08, line=(tone, 30, .9))
+        text(slide, side["text"], x + .5, 3.35, 4.75, .8, 12, WHITE)
         for j, (name, weight) in enumerate(side["signals"]):
-            y = 4.4 + j * .3
+            y = 4.45 + j * .3
             text(slide, name, x + .3, y, 3.6, .28, 12, WHITE)
             if weight:
                 text(slide, f"+{weight}", x + 4.5, y, .95, .28, 12, tone, True, PP_ALIGN.RIGHT)
@@ -315,11 +356,62 @@ def roadmap_slide(slide, e):
     text(slide, e["link"], 7.3, 5.75, 5, .3, 12, MUTED)
 
 
+def shots_caption(slide, x, y, width, head, body):
+    text(slide, head, x, y, width, .3, 15, CYAN, True)
+    text(slide, body, x, y + .35, width, .6, 11, MUTED)
+
+
+def shots2_slide(slide, e):
+    for i, (name, head, body) in enumerate(e["shots"]):
+        x = .45 + i * 6.35
+        picture(slide, f"frame-{name}.png", x, 1.85, width=6.15)
+        shots_caption(slide, x + .3, 5.85, 5.6, head, body)
+    x = .75
+    for label in e["points"]:
+        x += chip(slide, label, x, 6.55, MINT, 11) + .15
+
+
+def shots3_slide(slide, e):
+    for i, (name, head, body) in enumerate(e["shots"]):
+        x = .4 + i * 4.2
+        picture(slide, f"frame-{name}.png", x, 2.05, width=4.05)
+        shots_caption(slide, x + .25, 4.85, 3.6, head, body)
+    text(slide, "Интерфейс RU / KK \u00b7 всё выполняется локально в браузере", .75, 6.45, 11, .3, 13, MUTED)
+
+
+def terminal_slide(slide, e):
+    card(slide, .75, 1.95, 7.7, 4.5, RED)
+    text(slide, "\u25b8 LIVE THREAT FEED \u00b7 СИНТЕТИЧЕСКИЕ ПРИМЕРЫ", 1.05, 2.25, 7, .25, 11, MUTED, True)
+    tone = {"ALERT": RED, "WARN": AMBER, "PASS": MINT}
+    for i, (level, rule, msg, weight) in enumerate(e["lines"]):
+        y = 2.75 + i * .53
+        box = slide.shapes.add_textbox(Inches(1.05), Inches(y), Inches(7.2), Inches(.4))
+        tf = box.text_frame
+        tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+        tf.word_wrap = True
+        para = tf.paragraphs[0]
+        para.alignment = PP_ALIGN.LEFT
+        for part, color, bold in ((f"[16:4{i}:1{i}] ", "51627F", False), (f"{level:<5} ", tone[level], True),
+                                  (f"{rule:<15} ", WHITE, False), (msg + " ", MUTED, False), (weight, tone[level], True)):
+            run = para.add_run()
+            run.text = part
+            run.font.name = MONO
+            run.font.size = Pt(11.5)
+            run.font.bold = bold
+            run.font.color.rgb = RGBColor.from_string(color)
+    for i, (big, small) in enumerate(e["facts"]):
+        x, y = 8.75 + (i % 2) * 2.0, 1.95 + (i // 2) * 2.3
+        card(slide, x, y, 1.85, 2.15, [CYAN, MINT, VIOLET, AMBER][i])
+        text(slide, big, x + .22, y + .5, 1.5, .7, 34, [CYAN, MINT, VIOLET, AMBER][i], True)
+        text(slide, small, x + .22, y + 1.3, 1.5, .8, 11, MUTED)
+
+
 LAYOUTS = {
     "title": title_slide, "problem": problem_slide, "audience": audience_slide, "flow": flow_slide,
     "weights": weights_slide, "modules": modules_slide, "demo": demo_slide, "architecture": architecture_slide,
     "dataset": dataset_slide, "results": results_slide, "errors": errors_slide, "compare": compare_slide,
     "rollout": rollout_slide, "roadmap": roadmap_slide,
+    "shots2": shots2_slide, "shots3": shots3_slide, "terminal": terminal_slide,
 }
 
 
@@ -343,7 +435,7 @@ def build_pdf(source):
         "title": ParagraphStyle("title", fontName="Qalqan", fontSize=20, leading=26, textColor=colors.HexColor("#" + INK)),
         # A darker cyan remains legible on the white printable page.
         "subtitle": ParagraphStyle("subtitle", fontName="Qalqan", fontSize=11, leading=16, textColor=colors.HexColor("#087BA5")),
-        "body": ParagraphStyle("body", fontName="Qalqan", fontSize=9.5, leading=14, textColor=colors.HexColor("#" + CARD)),
+        "body": ParagraphStyle("body", fontName="Qalqan", fontSize=9.5, leading=14, textColor=colors.HexColor("#121B2E")),
     }
     story = []
     for block in source.read_text(encoding="utf-8").split("\n\n"):

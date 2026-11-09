@@ -26,7 +26,7 @@ def main():
         TARGET.mkdir(parents=True)
         for i, page in enumerate(pages, 1):
             Image.open(page).convert("RGB").resize((1600, 900), Image.LANCZOS).save(
-                TARGET / f"slide-{i:02d}.webp", "WEBP", quality=88, method=6)
+                TARGET / f"slide-{i:02d}.webp", "WEBP", quality=80, method=6)
     shutil.copy(SOURCE, TARGET / SOURCE.name)
     print(f"Exported {len(pages)} slides to {TARGET}")
 
