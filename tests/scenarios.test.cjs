@@ -5,9 +5,9 @@ const S = require('../frontend/scenario-engine.js');
 const E = require('../frontend/analyzer.js');
 const scenario = id => data.scenarios.find(s => s.id === id);
 
-test('all seven scenarios have bilingual metadata and valid synthetic turns', () => {
-  assert.equal(data.scenarios.length, 7);
-  assert.equal(new Set(data.scenarios.map(s => s.id)).size, 7);
+test('all eight scenarios have bilingual metadata and valid synthetic turns', () => {
+  assert.equal(data.scenarios.length, 8);
+  assert.equal(new Set(data.scenarios.map(s => s.id)).size, 8);
   for (const s of data.scenarios) {
     for (const key of ['title','description','note']) for (const lang of ['ru','kk']) assert.ok(s[key][lang]);
     assert.ok(s.turns.length >= 2 && s.turns.length <= 20);
@@ -67,4 +67,10 @@ test('domain evidence identifies the actual host and preserves exact source text
   const second = result.replies[1];
   assert.equal(second.signals[0].matches[0].text, 'kaspi.kz.verify.example');
   assert.equal(E.segments(second.text, second.signals).map(s => s.text).join(''), second.text);
+});
+
+test('the call scenario shows the code request only at the end and the score climbs step by step', () => {
+  const s = scenario('bank-call');
+  assert.deepEqual([1, 2, 3, 4].map(step => S.snapshot(s, step).result.score), [0, 18, 18, 63]);
+  assert.deepEqual(S.snapshot(s, 4).newSignals.map(x => x.code), ['secret_request']);
 });

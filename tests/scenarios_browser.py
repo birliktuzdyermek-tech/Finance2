@@ -18,7 +18,7 @@ def main():
         requests.clear()
         page.on('request', lambda req: requests.append((req.method, req.url, req.post_data)))
         context.set_offline(True)
-        expect(page.locator('#scenario-select option')).to_have_count(7)
+        expect(page.locator('#scenario-select option')).to_have_count(8)
         expect(page.locator('#scenario-score')).to_have_text('—')
         expect(page.locator('#scenario-previous')).to_be_disabled()
         for step, score in [(1,0),(2,40),(3,40),(4,85)]:
@@ -91,7 +91,7 @@ def main():
         page.reload(wait_until='networkidle')
         expect(page.locator('#scenario-position')).to_have_text('Шаг 0 / 4')
         browser.close()
-    print('Scenario browser passed: seven real analyses, prefix isolation, pause, rewind/reset, history handoff, RU/KK, keyboard, projector, 390px, offline and no data transmission.')
+    print('Scenario browser passed: eight real analyses, prefix isolation, pause, rewind/reset, history handoff, RU/KK, keyboard, projector, 390px, offline and no data transmission.')
 
 
 if __name__ == '__main__':

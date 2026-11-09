@@ -143,6 +143,26 @@
   .sim-badges-note { margin: 12px 0 0; font-size: 11px; color: var(--faint); }
   .sim-badge-note { margin: 12px 0 0; padding: 10px 12px; border: 1px solid rgba(34, 211, 255, .45); border-radius: 12px; background: rgba(34, 211, 255, .08); color: var(--ink); font-size: 12px !important; }
 
+  /* Simulated phone call */
+  .sim-ring { position: relative; width: 120px; height: 120px; margin: 14px auto 6px; display: grid; place-items: center; border-radius: 50%; background: rgba(61, 220, 151, .1); border: 1px solid rgba(61, 220, 151, .55); font-size: 46px; color: var(--mint); }
+  .sim-ring::before, .sim-ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--mint); animation: sim-ripple 2s ease-out infinite; }
+  .sim-ring::after { animation-delay: 1s; }
+  .sim-ring span { animation: sim-shake 1.3s ease-in-out infinite; }
+  @keyframes sim-ripple { from { transform: scale(1); opacity: .8; } to { transform: scale(1.9); opacity: 0; } }
+  @keyframes sim-shake { 0%, 60%, 100% { transform: none; } 10% { transform: rotate(-14deg); } 20% { transform: rotate(12deg); } 30% { transform: rotate(-10deg); } 40% { transform: rotate(8deg); } }
+  .sim-caller-name { text-align: center; margin: 4px 0 0 !important; font-size: 16px !important; font-weight: 600; }
+  .sim-caller-number { text-align: center; margin: 0 0 12px !important; font: 13px var(--mono) !important; color: var(--muted); }
+  .sim-caller-note { padding: 9px 12px; border-left: 2px solid var(--orange); border-radius: 0 10px 10px 0; background: rgba(245, 184, 75, .07); color: #f3dcb8; font-size: 12px !important; }
+  .sim-callbar { display: flex; align-items: center; gap: 10px; margin: 8px 0 10px; padding: 9px 12px; border: 1px solid rgba(61, 220, 151, .45); border-radius: 12px; background: rgba(61, 220, 151, .07); font-size: 12px; }
+  .sim-callbar b { color: var(--mint); font-weight: 600; }
+  .sim-call-clock { margin-left: auto; font: 600 12px var(--mono); }
+  .sim-wave { display: inline-flex; align-items: center; gap: 3px; height: 20px; }
+  .sim-wave i { width: 3px; height: 6px; border-radius: 2px; background: var(--mint); animation: sim-wave 1s ease-in-out infinite; }
+  .sim-wave i:nth-child(2) { animation-delay: .12s; } .sim-wave i:nth-child(3) { animation-delay: .24s; } .sim-wave i:nth-child(4) { animation-delay: .36s; } .sim-wave i:nth-child(5) { animation-delay: .48s; } .sim-wave i:nth-child(6) { animation-delay: .6s; } .sim-wave i:nth-child(7) { animation-delay: .72s; }
+  @keyframes sim-wave { 50% { height: 18px; } }
+  [data-call="true"] .sim-message { position: relative; padding-left: 30px; border-style: dashed; }
+  [data-call="true"] .sim-message::before { content: "\201C"; position: absolute; left: 10px; top: 6px; font-size: 22px; line-height: 1; color: var(--mint); }
+
   /* Pressure timer on the phone */
   .sim-timer { display: flex; align-items: center; gap: 14px; margin: 14px 0 6px; padding: 12px 14px; border: 1px solid rgba(255, 77, 109, .45); border-radius: 16px; background: rgba(255, 77, 109, .07); }
   .sim-timer[data-expired="true"] { border-color: var(--high); background: rgba(255, 77, 109, .14); }
@@ -182,7 +202,7 @@
     .main-links { border-radius: 18px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .sim-badge.fresh .sim-badge-hex, #sim-hotspot, .sim-xray::before, .sim-xray-label, .cyber-scan, .cr-spin1, .cr-spin2, .cr-spin3, .cr-sweep, .cr-blip, .cyber-ln, .hero-evidence .annotated-message::after { animation: none !important; }
+    .sim-ring::before, .sim-ring::after, .sim-ring span, .sim-wave i, .sim-badge.fresh .sim-badge-hex, #sim-hotspot, .sim-xray::before, .sim-xray-label, .cyber-scan, .cr-spin1, .cr-spin2, .cr-spin3, .cr-sweep, .cr-blip, .cyber-ln, .hero-evidence .annotated-message::after { animation: none !important; }
     .cr-blip { opacity: .6; }
   }
 }
