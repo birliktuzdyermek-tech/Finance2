@@ -202,3 +202,7 @@ test('every story with pressure has positive whole minutes and the others have n
   for(const story of S.stories)assert.ok(story.pressure===undefined||(Number.isInteger(story.pressure)&&story.pressure>0));
   for(const badge of Badges.badges){assert.ok(badge.name.ru&&badge.name.kk&&badge.text.ru&&badge.text.kk);assert.ok(Badges.icons[badge.icon]);}
 });
+
+test('only the bank call is presented as a phone call',()=>{
+  assert.deepEqual(S.stories.filter(s=>s.call).map(s=>s.id),['bank-call']);
+});

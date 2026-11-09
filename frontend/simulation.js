@@ -50,7 +50,16 @@ window.QalqanSimulation = (() => {
     consequence:['Что произошло в сюжете','Оқиғада не болды'],safer:['Следующий безопасный шаг','Келесі қауіпсіз қадам'],
     mapNoTask:['Задание о ссылке не выполнялось.','Сілтеме тапсырмасы орындалмады.'],mapUnfinished:['Задание о ссылке открыто, но ответ не проверен.','Сілтеме тапсырмасы ашылды, бірақ жауап тексерілмеді.']
   };
-  const t=key=>L.choices[key]?.[I.language()]||labels[key][I.language()==='kk'?1:0];
+  // A story shown as a phone call renames a few actions; the actions themselves are unchanged.
+  const callLabels={
+    open_phone:['Принять звонок','Қоңырауды қабылдау'],analyze:['Проверить субтитры через Qalqan','Субтитрлерді Qalqan арқылы тексеру'],
+    contact:['Положить трубку и позвонить в банк самому','Тұтқаны қойып, банкке өзім қоңырау шалу'],ignore:['Положить трубку','Тұтқаны қою'],
+    send_demo:['Назвать учебный код','Оқу кодын айту'],unverified:['Номер и имя звонящего не проверены','Қоңырау шалушының нөмірі мен аты тексерілмеген'],
+    transcript:['Субтитры разговора и ваши ответы','Әңгіме субтитрлері мен жауаптарыңыз'],sender:['Звонящий','Қоңырау шалушы'],
+    ring:['Входящий звонок','Кіріс қоңырау'],ringHint:['Звонок идёт в записи: приложение покажет разговор субтитрами. Звука нет.','Қоңырау жазбада: қолданба әңгімені субтитрмен көрсетеді. Дыбыс жоқ.'],
+    callerNote:['Имя и номер на экране ничего не доказывают: их легко подделать.','Экрандағы аты мен нөмірі ештеңені дәлелдемейді: оларды оңай жасандыруға болады.']
+  };
+  const t=key=>L.choices[key]?.[I.language()]||(session.story.call&&callLabels[key]?.[I.language()==='kk'?1:0])||labels[key][I.language()==='kk'?1:0];
   function el(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;}
   function button(text,fn,cls='secondary-button'){const b=el('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;}
   function heading(text,id){const n=el('h2',text);if(id)n.id=id;n.tabIndex=-1;return n;}
@@ -72,6 +81,11 @@ window.QalqanSimulation = (() => {
   function renderPhone(){
     const s=session.state,p=$('sim-phone-body');p.replaceChildren();
     p.append(el('span',t('phone'),'sim-kicker'));
+    if(session.story.call)p.dataset.call='true';else delete p.dataset.call;
+    if(s.phase==='notification'&&session.story.call){
+      const ring=el('div',null,'sim-ring');ring.setAttribute('aria-hidden','true');ring.append(el('span','☎'));
+      p.append(ring,heading(t('ring'),'sim-phone-title'),el('p',session.story.sender[I.language()],'sim-caller-name'),el('p','+7 700 000 00 00','sim-caller-number'),el('p',t('ringHint'),'card-description'),el('p',t('callerNote'),'sim-caller-note'));actions(p);return;
+    }
     if(s.phase==='notification'){
       p.append(el('div','✉','sim-notification-icon'),heading(t('notification'),'sim-phone-title'),el('p',t('notificationHint'),'card-description'));actions(p);return;
     }
@@ -182,6 +196,7 @@ window.QalqanSimulation = (() => {
     const verdict={low:pair('Низкий индекс','Төмен индекс'),suspicious:pair('Есть подозрительные признаки','Күмәнді белгілер бар'),high:pair('Много признаков риска','Қауіп белгілері көп')};
     const head=el('div',null,'sim-analysis-head');head.append(heading(t('analysis'),'sim-analysis-title'),el('strong',result.score+' / 100','sim-score '+result.verdict+'-text'),el('span',verdict[result.verdict]));
     panel.append(head,el('p',t('scoreHint'),'card-description'),window.QalqanEvidence.render(result),el('p',window.QalqanEvidence.summary(result),'card-description'),el('p',window.QalqanEvidence.limits(),'card-description'));
+    if(session.story.call)panel.append(el('p',pair('Пояснение автора: ','Автор түсіндірмесі: ')+t('callerNote'),'card-description'));
     const open=button(t(saved?'reportAgain':'report'),()=>{
       if(!saved)saved=callbacks.save(session.input(),session.state.incident);
       // A saved report is a snapshot of the situation at the moment it was first saved.

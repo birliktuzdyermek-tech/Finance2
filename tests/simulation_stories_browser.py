@@ -47,6 +47,31 @@ def main():
             assert page.locator('#sim-map-list > li').count() >= 3
             if minutes:
                 expect(page.locator('.sim-timer-note')).to_contain_text('Решение принято за')
+        # The bank call looks like a call: ringing screen, live clock, captions, hang-up wording.
+        page.locator('[data-story="bank-call"]').click()
+        expect(page.locator('.sim-ring')).to_have_count(1)
+        expect(page.locator('.sim-caller-number')).to_have_text('+7 700 000 00 00')
+        expect(page.locator('.sim-caller-note')).to_contain_text('ничего не доказывают')
+        expect(page.locator('#sim-hotspot')).to_contain_text('Принять звонок')
+        expect(page.locator('.sim-callbar')).to_have_count(0)
+        page.locator('#sim-hotspot').click()
+        expect(page.locator('.sim-ring')).to_have_count(0)
+        expect(page.locator('.sim-callbar')).to_have_count(1)
+        assert page.locator('.sim-call-clock').inner_text() in ('00:00', '00:01', '00:02')
+        page.wait_for_timeout(2300)
+        assert page.locator('.sim-call-clock').inner_text() in ('00:02', '00:03', '00:04')
+        expect(page.locator('#sim-phone-body')).to_have_attribute('data-call', 'true')
+        expect(page.locator('[data-sim-action="ignore"]')).to_have_text('Положить трубку')
+        expect(page.locator('[data-sim-action="contact"]')).to_contain_text('позвонить в банк самому')
+        expect(page.locator('[data-sim-action="send_demo"]')).to_have_text('Назвать учебный код')
+        page.locator('[data-sim-action="analyze"]').click()
+        expect(page.locator('#sim-analysis')).to_contain_text('Пояснение автора')
+        page.locator('[data-sim-action="ignore"]').click()
+        expect(page.locator('.sim-callbar')).to_have_count(0)
+        # Other stories keep the ordinary message look.
+        page.locator('[data-story="fake-job"]').click()
+        expect(page.locator('.sim-ring')).to_have_count(0)
+        expect(page.locator('#sim-phone-body')).not_to_have_attribute('data-call', 'true')
         # Kazakh interface for a new story; the source message stays as authored.
         page.locator('[data-story="fake-job"]').click(); page.locator('#sim-hotspot').click()
         page.locator('[data-language="kk"]').click()
@@ -61,7 +86,7 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
         assert not errors, errors
         browser.close()
-    print('Simulator stories passed: 5 new stories end to end, pages and direct asks, timers, KK, storage and 390px.')
+    print('Simulator stories passed: 5 new stories end to end, pages and direct asks, the call screen, timers, KK, storage and 390px.')
 
 
 if __name__ == '__main__':

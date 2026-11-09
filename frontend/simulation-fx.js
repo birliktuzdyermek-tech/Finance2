@@ -35,10 +35,25 @@ window.QalqanSimulationFx = (() => {
       : pair('Срочность — приём давления. Таймер учебный и не влияет на индекс Qalqan.', 'Асықтыру — қысым жасау тәсілі. Таймер оқу үшін, Qalqan индексіне әсер етпейді.');
   }
 
+  function syncCall(session, body) {
+    body.querySelectorAll('.sim-callbar').forEach(n => n.remove());
+    const phase = session.state.phase;
+    if (!session.story.call || phase === 'notification' || phase === 'outcome') return;
+    const bar = el('div', null, 'sim-callbar');
+    bar.setAttribute('role', 'status');
+    const wave = el('span', null, 'sim-wave'); wave.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 7; i++) wave.append(el('i'));
+    bar.append(el('b', pair('Идёт звонок', 'Қоңырау жүріп жатыр')), el('span', '00:00', 'sim-call-clock'), wave);
+    (body.querySelector('#sim-phone-title') || body.querySelector('.sim-kicker'))?.after(bar);
+    paintCall(bar, session);
+  }
+  function paintCall(bar, session) { bar.querySelector('.sim-call-clock').textContent = clock(elapsed(record(session))); }
+
   function syncTimer(session, body) {
     body.querySelectorAll('.sim-timer').forEach(n => n.remove());
     clearInterval(tick); tick = 0;
     const phase = session.state.phase;
+    if (session.story.call && phase !== 'notification' && phase !== 'outcome') tick = setInterval(tickAll, 1000);
     if (!session.story.pressure || phase === 'notification') return;
     const total = session.story.pressure * 60;
     if (phase === 'outcome') {
@@ -55,7 +70,14 @@ window.QalqanSimulationFx = (() => {
     body.querySelector('.sim-kicker')?.after(node);
     paintTimer(node, session);
     // Update the visible clock without rebuilding the phone; keeps focus and reading position stable.
-    tick = setInterval(() => { const n = document.querySelector('#sim-phone-body .sim-timer'); if (!n || !current) return; paintTimer(n, current); }, 1000);
+    clearInterval(tick); tick = setInterval(tickAll, 1000);
+  }
+
+  function tickAll() {
+    if (!current) return;
+    const timer = document.querySelector('#sim-phone-body .sim-timer'), bar = document.querySelector('#sim-phone-body .sim-callbar');
+    if (timer && current.story.pressure) paintTimer(timer, current);
+    if (bar) paintCall(bar, current);
   }
 
   function firstFragments(result) {
@@ -95,6 +117,7 @@ window.QalqanSimulationFx = (() => {
     const body = document.getElementById('sim-phone-body'), stage = document.getElementById('sim-stage');
     if (!body || !stage) return;
     syncTimer(session, body);
+    syncCall(session, body);
     syncXray(session, stage, session.result());
   }
   function stop() { clearInterval(tick); tick = 0; }
