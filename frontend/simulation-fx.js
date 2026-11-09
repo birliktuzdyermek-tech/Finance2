@@ -5,7 +5,7 @@ window.QalqanSimulationFx = (() => {
   const I = window.QalqanI18n;
   const pair = (ru, kk) => (I.language() === 'kk' ? kk : ru);
   // Minutes shown on the learning timer, by story id. Stories without pressure show no timer.
-  const PRESSURE = { 'blocked-card': 10, 'safe-transfer': 15 };
+  const PRESSURE = { 'blocked-card': 10, 'safe-transfer': 15, 'qr-parking': 10, 'relative-transfer': 15, 'bank-call': 5, 'fake-job': 20 };
   const timers = new WeakMap();
   let xrayOn = true, tick = 0, current = null;
 

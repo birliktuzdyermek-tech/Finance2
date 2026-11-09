@@ -6,7 +6,7 @@ window.QalqanSimulation = (() => {
   let session=E.createSession(E.stories[0].id),scene=null,callbacks={},saved=null,active=false;
   const labels={
     title:['Сначала подумайте. Потом действуйте.','Алдымен ойланыңыз. Содан кейін әрекет етіңіз.'],
-    intro:['Выберите ответ в диалоге, исследуйте ссылку и пройдите свой путь до карты решений. Три ситуации, один телефон.','Диалогта жауап таңдаңыз, сілтемені зерттеңіз және шешімдер картасына дейін өз жолыңызды өтіңіз. Үш жағдай, бір телефон.'],
+    intro:['Выберите ответ в диалоге, исследуйте ссылку и пройдите свой путь до карты решений. Восемь ситуаций, один телефон.','Диалогта жауап таңдаңыз, сілтемені зерттеңіз және шешімдер картасына дейін өз жолыңызды өтіңіз. Сегіз жағдай, бір телефон.'],
     notice:['Учебная симуляция · вымышленные данные. Сайты не открываются, коды и деньги не отправляются.','Оқу симуляциясы · ойдан шығарылған деректер. Сайттар ашылмайды, кодтар мен ақша жіберілмейді.'],
     choose:['Выберите ситуацию','Жағдайды таңдаңыз'],room:['Ваше рабочее место','Сіздің жұмыс орныңыз'],
     roomHint:['Поверните комнату мышью или кнопками. Нажмите на телефон.','Бөлмені тінтуірмен не батырмалармен бұрыңыз. Телефонды басыңыз.'],
@@ -84,7 +84,7 @@ window.QalqanSimulation = (() => {
     if(s.phase==='page'){
       p.append(heading(t('page'),'sim-phone-title'),source(session.story.url,'sim-address'),el('p',t('pageHint'),'card-description'));
       const code=session.story.intent==='code';
-      p.append(el('span',code?pair('Вымышленный код','Ойдан шығарылған код'):pair('Вымышленная сумма','Ойдан шығарылған сома'),'sim-kicker'),el('strong',code?'000 000':'20 000 ₸','sim-demo-value'));
+      p.append(el('span',code?pair('Вымышленный код','Ойдан шығарылған код'):pair('Вымышленная сумма','Ойдан шығарылған сома'),'sim-kicker'),el('strong',code?'000 000':(session.story.demo||'20 000 ₸'),'sim-demo-value'));
       actions(p);return;
     }
     p.append(heading(t('outcome'),'sim-phone-title'));
@@ -188,7 +188,7 @@ window.QalqanSimulation = (() => {
   function render(){
     document.querySelectorAll('[data-sim-i18n]').forEach(n=>{n.textContent=t(n.dataset.simI18n);});
     const picker=$('sim-stories');picker.replaceChildren();picker.setAttribute('aria-label',t('choose'));
-    E.stories.forEach(story=>{const b=button('',()=>{select(story.id);picker.querySelector('[aria-pressed="true"]').focus();}, 'sim-story');b.dataset.story=story.id;b.setAttribute('aria-pressed',String(story===session.story));b.append(el('span',story.number),el('strong',story.title[I.language()]));picker.append(b);});
+    E.stories.forEach(story=>{const b=button('',()=>{select(story.id);picker.querySelector('[aria-pressed="true"]').focus();}, 'sim-story');b.dataset.story=story.id;b.setAttribute('aria-pressed',String(story===session.story));b.append(el('span',story.number),el('strong',story.title[I.language()]));const meta=el('span',null,'sim-story-meta');meta.setAttribute('aria-hidden','true');if(story.level>0){const dots=el('i',null,'sim-level');dots.dataset.level=String(story.level);meta.append(dots);}if(story.isNew)meta.append(el('em',pair('Новый','Жаңа'),'sim-new'));b.append(meta);picker.append(b);});
     $('sim-intro').textContent=session.story.intro[I.language()];
     $('sim-canvas').setAttribute('aria-label',t('keyboard'));
     const s=session.state;$('view-simulator').dataset.phase=s.phase;
