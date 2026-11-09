@@ -158,3 +158,47 @@ test('every address breaks into exact parts and exactly one domain',()=>{
   }
   for(const story of S.stories.filter(s=>!s.url))assert.deepEqual(L.parts[story.id],[],story.id);
 });
+
+const Badges=require('../frontend/simulation-badges.js');
+const play=(id,actions,part)=>{
+  const s=S.createSession(id);
+  for(const action of actions){
+    if(action==='check_link'){s.act('inspect_link');s.choosePart(part||'domain');s.checkPart();}else s.act(action);
+  }
+  return s;
+};
+test('badges: a careful path earns five badges and is idempotent',()=>{
+  const progress=Badges.createProgress(S.stories.length);
+  const s=play('blocked-card',['open_phone','analyze','check_link','contact']);
+  assert.deepEqual(Badges.earnedBy(s).sort(),['calm','domain','selfcall','stop','verify']);
+  assert.deepEqual(progress.record(s).sort(),['calm','domain','selfcall','stop','verify']);
+  assert.deepEqual(progress.record(s),[],'recording the same session again earns nothing new');
+  assert.equal(progress.done.size,1);assert.equal(progress.earned.size,5);
+});
+test('badges: handing over a code earns none, and late analysis does not count as verifying first',()=>{
+  const bad=play('blocked-card',['open_phone','open_link','analyze','send_demo']);
+  assert.deepEqual(Badges.earnedBy(bad),[]);
+  const early=play('blocked-card',['open_phone','analyze','open_link','send_demo']);
+  assert.deepEqual(Badges.earnedBy(early),['verify']);
+  assert.deepEqual(Badges.earnedBy(S.createSession('blocked-card')),[],'nothing before the outcome');
+});
+test('badges: stopping an ordinary story is a stop but not resisting pressure; a wrong domain earns nothing',()=>{
+  const calm=play('ordinary-receipt',['open_phone','ignore']);
+  assert.deepEqual(Badges.earnedBy(calm),['stop']);
+  const wrong=play('blocked-card',['open_phone','check_link','ignore'],'prefix');
+  assert.equal(Badges.earnedBy(wrong).includes('domain'),false);
+  assert.equal(Badges.earnedBy(wrong).includes('calm'),true);
+});
+test('badges: all stories are required for the last badge, with any ending',()=>{
+  const progress=Badges.createProgress(S.stories.length);
+  const ids=S.stories.map(s=>s.id);
+  ids.slice(0,-1).forEach(id=>{progress.record(play(id,['open_phone','ignore']));assert.equal(progress.earned.has('all'),false);});
+  const last=progress.record(play(ids.at(-1),['open_phone','ignore']));
+  assert.ok(last.includes('all'));assert.equal(progress.done.size,8);
+});
+test('every story with pressure has positive whole minutes and the others have none',()=>{
+  const timed=S.stories.filter(s=>s.pressure).map(s=>s.id);
+  assert.deepEqual(timed,['blocked-card','safe-transfer','qr-parking','relative-transfer','bank-call','fake-job']);
+  for(const story of S.stories)assert.ok(story.pressure===undefined||(Number.isInteger(story.pressure)&&story.pressure>0));
+  for(const badge of Badges.badges){assert.ok(badge.name.ru&&badge.name.kk&&badge.text.ru&&badge.text.kk);assert.ok(Badges.icons[badge.icon]);}
+});

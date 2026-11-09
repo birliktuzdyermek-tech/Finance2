@@ -125,6 +125,24 @@
   .sim-actions .primary-button { background: rgba(34, 211, 255, .1); color: var(--ink); border-color: rgba(34, 211, 255, .55); }
   .sim-actions .primary-button:hover { background: rgba(34, 211, 255, .2); }
 
+  /* Badges */
+  .sim-badges { margin: 4px 0 20px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 20px; background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .sim-badges-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .sim-badges-head h2 { margin: 0; font: 600 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .sim-badges-count { font: 600 12px var(--mono); color: var(--cyan); }
+  .sim-badge-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+  .sim-badge { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; opacity: .42; filter: grayscale(1); transition: opacity .4s, filter .4s; }
+  .sim-badge.earned { opacity: 1; filter: none; }
+  .sim-badge-hex { width: 52px; height: 58px; display: grid; place-items: center; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: linear-gradient(160deg, rgba(34, 211, 255, .35), rgba(255,255,255,.05)); color: var(--cyan); }
+  .sim-badge.earned .sim-badge-hex { box-shadow: 0 0 20px rgba(34, 211, 255, .5); background: linear-gradient(160deg, rgba(34, 211, 255, .5), rgba(139, 92, 246, .25)); }
+  .sim-badge-hex svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .sim-badge-name { font-size: 12px; line-height: 1.35; color: var(--muted); }
+  .sim-badge.earned .sim-badge-name { color: var(--ink); }
+  .sim-badge.fresh .sim-badge-hex { animation: sim-badge-pop .9s ease-out; }
+  @keyframes sim-badge-pop { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.18); } 100% { transform: none; } }
+  .sim-badges-note { margin: 12px 0 0; font-size: 11px; color: var(--faint); }
+  .sim-badge-note { margin: 12px 0 0; padding: 10px 12px; border: 1px solid rgba(34, 211, 255, .45); border-radius: 12px; background: rgba(34, 211, 255, .08); color: var(--ink); font-size: 12px !important; }
+
   /* Pressure timer on the phone */
   .sim-timer { display: flex; align-items: center; gap: 14px; margin: 14px 0 6px; padding: 12px 14px; border: 1px solid rgba(255, 77, 109, .45); border-radius: 16px; background: rgba(255, 77, 109, .07); }
   .sim-timer[data-expired="true"] { border-color: var(--high); background: rgba(255, 77, 109, .14); }
@@ -151,7 +169,7 @@
   .sim-xray-label.pos-3 { left: -250px; top: 40px; animation-delay: -3.1s; }
   @keyframes sim-bob { 50% { transform: translateY(-7px); } }
 
-  @media (max-width: 1050px) { .sim-stories { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 1050px) { .sim-stories { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sim-badge-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
     .sim-xray { left: 0; top: auto; bottom: 66px; width: 100%; height: auto; display: flex; flex-direction: column; gap: 6px; padding: 0 12px; }
     .sim-xray::before { display: none; }
@@ -164,7 +182,7 @@
     .main-links { border-radius: 18px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    #sim-hotspot, .sim-xray::before, .sim-xray-label, .cyber-scan, .cr-spin1, .cr-spin2, .cr-spin3, .cr-sweep, .cr-blip, .cyber-ln, .hero-evidence .annotated-message::after { animation: none !important; }
+    .sim-badge.fresh .sim-badge-hex, #sim-hotspot, .sim-xray::before, .sim-xray-label, .cyber-scan, .cr-spin1, .cr-spin2, .cr-spin3, .cr-sweep, .cr-blip, .cyber-ln, .hero-evidence .annotated-message::after { animation: none !important; }
     .cr-blip { opacity: .6; }
   }
 }

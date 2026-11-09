@@ -4,6 +4,7 @@ window.QalqanSimulation = (() => {
   const E=window.QalqanSimulationEngine,I=window.QalqanI18n,L=window.QalqanSimulationLessons;
   const $=id=>document.getElementById(id),pair=(ru,kk)=>I.language()==='kk'?kk:ru;
   let session=E.createSession(E.stories[0].id),scene=null,callbacks={},saved=null,active=false;
+  const B=window.QalqanSimulationBadges;let progress=B.createProgress(E.stories.length),fresh=[];
   const labels={
     title:['Сначала подумайте. Потом действуйте.','Алдымен ойланыңыз. Содан кейін әрекет етіңіз.'],
     intro:['Выберите ответ в диалоге, исследуйте ссылку и пройдите свой путь до карты решений. Восемь ситуаций, один телефон.','Диалогта жауап таңдаңыз, сілтемені зерттеңіз және шешімдер картасына дейін өз жолыңызды өтіңіз. Сегіз жағдай, бір телефон.'],
@@ -54,10 +55,11 @@ window.QalqanSimulation = (() => {
   function button(text,fn,cls='secondary-button'){const b=el('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;}
   function heading(text,id){const n=el('h2',text);if(id)n.id=id;n.tabIndex=-1;return n;}
   function source(text,cls){const n=el('p',text,cls);n.dataset.userText='';return n;}
-  function select(id,focus=false){session=E.createSession(id);saved=null;scene?.reset();render();if(focus)$('sim-phone-title').focus();}
+  function select(id,focus=false){session=E.createSession(id);saved=null;fresh=[];scene?.reset();render();if(focus)$('sim-phone-title').focus();}
   function act(action){
     const before=session.state;
-    session.act(action,I.language());if(before.incident!==session.state.incident||before.transcript.length!==session.state.transcript.length)saved=null;render();
+    session.act(action,I.language());if(before.phase!=='outcome'&&session.state.phase==='outcome')fresh=progress.record(session);
+    if(before.incident!==session.state.incident||before.transcript.length!==session.state.transcript.length)saved=null;render();
     (action==='analyze'?$('sim-analysis-title'):action==='inspect_link'?$('sim-inspector-title'):$('sim-phone-title')).focus();
   }
   function actions(target){
@@ -96,6 +98,7 @@ window.QalqanSimulation = (() => {
     };
     p.append(el('p',outcomes[s.ending],'sim-outcome-text'),el('p',t('incident')+t(s.incident),'sim-incident'));
     if(s.incident==='opened')p.append(el('p',pair('Само открытие ссылки не доказывает взлом. Дальнейшие шаги зависят от того, что было сделано на странице.','Сілтемені ашудың өзі бұзылғанын дәлелдемейді. Келесі қадамдар бетте не істелгеніне байланысты.'),'card-description'));
+    if(fresh.length){const note=el('p',pair('Новый значок: ','Жаңа белгіше: ')+fresh.map(id=>B.badges.find(x=>x.id===id).name[I.language()==='kk'?'kk':'ru']).join(', '),'sim-badge-note');note.setAttribute('role','status');p.append(note);}
     const jump=button(t('showMap'),()=>$('sim-map-title').focus(),'primary-button');jump.id='sim-show-map';p.append(jump);
     actions(p);
     const restart=el('div',null,'sim-actions'),next=(E.stories.indexOf(session.story)+1)%E.stories.length;
@@ -185,6 +188,20 @@ window.QalqanSimulation = (() => {
       callbacks.open(saved);
     });open.id='sim-report';panel.append(open,el('p',t('saveHint'),'card-description'));
   }
+  function renderBadges(){
+    const panel=$('sim-badges'),kk=I.language()==='kk'?'kk':'ru';panel.replaceChildren();
+    const head=el('div',null,'sim-badges-head'),title=el('h2',pair('Значки','Белгішелер'));title.id='sim-badges-title';
+    head.append(title,el('span',pair(`Значки ${progress.earned.size} / ${progress.total} · сюжеты ${progress.done.size} / ${progress.totalStories}`,`Белгішелер ${progress.earned.size} / ${progress.total} · оқиғалар ${progress.done.size} / ${progress.totalStories}`),'sim-badges-count'));
+    const list=el('ul',null,'sim-badge-list');
+    B.badges.forEach(badge=>{
+      const on=progress.earned.has(badge.id),li=el('li',null,'sim-badge'+(on?' earned':'')+(fresh.includes(badge.id)?' fresh':''));li.dataset.badge=badge.id;
+      li.title=badge.text[kk];li.setAttribute('aria-label',badge.name[kk]+': '+(on?pair('получен','алынды'):pair('не получен','алынбады'))+'. '+badge.text[kk]);
+      const hex=el('span',null,'sim-badge-hex');hex.setAttribute('aria-hidden','true');
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.innerHTML=B.icons[badge.icon];hex.append(svg);
+      li.append(hex,el('span',badge.name[kk],'sim-badge-name'));list.append(li);
+    });
+    panel.append(head,list,el('p',pair('Значки — учебная обратная связь. Они не оценивают вашу защищённость, не влияют на индекс Qalqan и хранятся только в памяти вкладки.','Белгішелер — оқу кері байланысы. Олар қорғану деңгейіңізді бағаламайды, Qalqan индексіне әсер етпейді және тек бет жадында сақталады.'),'sim-badges-note'));
+  }
   function render(){
     document.querySelectorAll('[data-sim-i18n]').forEach(n=>{n.textContent=t(n.dataset.simI18n);});
     const picker=$('sim-stories');picker.replaceChildren();picker.setAttribute('aria-label',t('choose'));
@@ -195,7 +212,7 @@ window.QalqanSimulation = (() => {
     $('sim-hotspot').hidden=s.phase!=='notification';$('sim-hotspot').textContent=t('open_phone')+' ↗';
     document.querySelectorAll('[data-sim-camera]').forEach(n=>{n.title=t(n.dataset.simLabel);n.setAttribute('aria-label',t(n.dataset.simLabel));});
     $('sim-step').textContent=pair('Шаг ','Қадам ')+(s.phase==='notification'?'1 / 3':s.phase==='outcome'?'3 / 3':'2 / 3');
-    renderPhone();renderInspector();renderAnalysis();renderReview();renderMap();
+    renderBadges();renderPhone();renderInspector();renderAnalysis();renderReview();renderMap();
     $('sim-journal-card').hidden=!s.journal.length||s.phase==='outcome';$('sim-journal').replaceChildren(...s.journal.map(a=>el('li',t(a))));
     scene?.setPhase(s.phase);
     window.QalqanSimulationFx?.sync(session);
@@ -219,5 +236,5 @@ window.QalqanSimulation = (() => {
     scene?.setActive(active);
     if(!active)window.QalqanSimulationFx?.stop();
   }
-  return {init,onRoute,clear(){select(E.stories[0].id);}};
+  return {init,onRoute,clear(){progress=B.createProgress(E.stories.length);select(E.stories[0].id);}};
 })();
