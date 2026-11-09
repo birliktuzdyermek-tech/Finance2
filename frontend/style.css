@@ -365,15 +365,6 @@ td a { font-family: var(--mono); font-size: 12px; }
 .report-paper hr { border: 0; border-top: 1px solid #344760; margin: 25px 0; }
 .report-paper .report-score { font-family: var(--mono); font-size: 38px; font-weight: 600; margin: 24px 0 12px; }
 .report-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
-.projector-slide { padding: 24px 0 35px; min-height: 65vh; }
-.projector-slide h1 { font-size: clamp(38px,5vw,68px); margin: 35px 0 50px; }
-.projector-steps { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 22px; }
-.projector-steps article { min-height: 235px; padding: 28px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
-.projector-steps article > span { display: block; font-family: var(--mono); font-size: 24px; color: var(--cyan); margin-bottom: 25px; }
-.projector-steps h2 { font-size: 25px; }
-.projector-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 34px; margin: 45px 0; }
-.projector-stats strong { display: block; color: var(--cyan); font-size: clamp(50px,7vw,100px); font-family: var(--mono); font-weight: 600; line-height: 1.2; }
-.projector-stats p { font-size: 21px; margin: 28px 0 0; }
 .projector-mode .sidebar, .projector-mode .topbar, .projector-mode .main-footer { display: none; }
 .projector-mode main { max-width: 1600px; padding: 50px; }
 .projector-mode .result-layout { grid-template-columns: .65fr 1.7fr 1.1fr; gap: 26px; }
@@ -454,9 +445,13 @@ mark.evidence-urgent, mark.evidence-secret, mark.evidence-link { background: tra
 .presentation-controls { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .presentation-controls > .eyebrow { margin: 0; }
 #presentation-counter { color: var(--muted); font-family: var(--mono); font-size: 13px; white-space: nowrap; }
-.slide-brand { display: flex; align-items: center; justify-content: space-between; gap: 20px; color: var(--muted); margin-top: 20px; font-size: 18px; }
-.slide-brand > strong { color: var(--ink); font-size: 24px; }
-.slide-footer { border-top: 1px solid var(--line); padding-top: 22px; margin: 65px 0 0; color: var(--muted); font-size: 23px; }
+.presentation-stage { margin: 24px 0 0; }
+.presentation-slide { margin: 0; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--surface); }
+.presentation-slide img { display: block; width: 100%; height: auto; }
+.presentation-controls a.secondary-button { text-decoration: none; display: inline-flex; align-items: center; }
+.slide-footer { border-top: 1px solid var(--line); padding-top: 18px; margin: 28px 0 0; color: var(--muted); font-size: 15px; }
+.projector-mode .presentation-stage { max-width: min(100%, calc((100vh - 170px) * 16 / 9)); margin-inline: auto; }
+.projector-mode #presentation-download, .projector-mode #view-presentation .slide-footer { display: none; }
 .projector-mode .presentation-controls { padding-right: 200px; }
 .projector-mode .presentation-controls .eyebrow { display: none; }
 .icon-button { flex: 0 0 auto; height: 36px; width: 36px; display: grid; place-items: center; background: transparent; border: 1px solid var(--line); color: var(--muted); font-size: 23px; border-radius: 5px; }
@@ -493,8 +488,6 @@ mark.evidence-urgent, mark.evidence-secret, mark.evidence-link { background: tra
   .scheme-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .history-filters { grid-template-columns: 1.5fr 1fr 1fr; }
   .history-filters .search-field { grid-column: 1/-1; }
-  .projector-steps article { padding: 22px; }
-  .projector-steps h2 { font-size: 22px; }
 }
 @media (max-width: 960px) {
   .sidebar { grid-template-columns: auto 1fr; }
@@ -516,8 +509,6 @@ mark.evidence-urgent, mark.evidence-secret, mark.evidence-link { background: tra
   .demo-grid { grid-template-columns: 1fr; }
   .demo-card .primary-button { align-self: flex-start; }
   .brand-grid, .tour-grid { grid-template-columns: 1.5fr 1fr; gap: 20px; }
-  .projector-steps { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .projector-steps article { min-height: 180px; }
   .projector-mode main { padding: 50px 28px 28px; }
   .projector-mode .result-layout { grid-template-columns: .7fr 1.6fr; }
   .projector-mode .result-explanation-card { grid-column: 1/-1; }
@@ -610,10 +601,6 @@ mark.evidence-urgent, mark.evidence-secret, mark.evidence-link { background: tra
   .states-grid { gap: 17px; }
   .state-card { padding: 21px; }
   .state-card h2 { align-items: flex-start; font-size: 17px; }
-  .projector-stats { gap: 22px; margin: 32px 0; }
-  .projector-stats strong { font-size: 46px; }
-  .projector-stats p { font-size: 15px; margin-top: 20px; }
-  .projector-slide h1 { margin: 20px 0 32px; font-size: 38px; }
   .projector-mode .risk-circle strong { font-size: 80px; }
   .report-dialog { padding: 18px; max-height: calc(100dvh - 26px); }
   .report-paper { padding: 25px; }
@@ -692,12 +679,6 @@ mark.evidence-urgent, mark.evidence-secret, mark.evidence-link { background: tra
   .scheme-card p { font-size: 12px; }
   .states-grid { grid-template-columns: 1fr; }
   .state-card { min-height: 215px; }
-  .projector-steps { gap: 14px; }
-  .projector-steps article { min-height: 190px; padding: 20px; }
-  .projector-steps h2 { font-size: 20px; }
-  .projector-stats { grid-template-columns: 1fr; gap: 30px; }
-  .projector-stats strong { font-size: 68px; }
-  .projector-stats p { margin: 10px 0 0; }
   .projector-mode main { padding: 65px 20px 25px; }
   .projector-mode .result-layout { grid-template-columns: 1fr; }
   .projector-mode .result-message-card, .projector-mode .signal-row, .projector-mode .card-description { font-size: 16px; }
