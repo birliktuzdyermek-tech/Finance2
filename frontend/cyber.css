@@ -93,13 +93,67 @@
   .cyber-ln .t { color: #51627f; } .cyber-ln .a { color: var(--high); } .cyber-ln .w { color: var(--orange); } .cyber-ln .o { color: var(--mint); }
   .cyber-feed-foot { margin: 10px 0 0; font-size: 12px; color: var(--faint); }
 
+  /* 3D simulator */
+  .sim-notice { border-left-color: var(--mint); background: rgba(61, 220, 151, .07); border-radius: 0 12px 12px 0; color: #bfeede; }
+  .sim-story { background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 16px; transition: border-color .25s, box-shadow .25s, transform .25s; }
+  .sim-story:hover { transform: translateY(-2px); border-color: rgba(34, 211, 255, .5); }
+  .sim-story[aria-pressed=true] { border-color: var(--cyan); background: rgba(34, 211, 255, .08); box-shadow: 0 0 26px rgba(34, 211, 255, .22), inset 0 0 22px rgba(34, 211, 255, .08); }
+  .sim-story[aria-pressed=true] span { color: var(--cyan); }
+  .sim-stage { border-radius: 22px; border-color: var(--line); background: radial-gradient(ellipse at 50% 55%, #0d2848, #050914 82%); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 20px 60px rgba(0,0,0,.4); }
+  #sim-canvas { border-radius: 22px; }
+  .sim-kicker { color: var(--cyan); letter-spacing: .14em; }
+  #sim-hotspot { background: rgba(34, 211, 255, .12); color: var(--ink); border: 1px solid var(--cyan); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 7px rgba(34, 211, 255, .1), 0 0 30px rgba(34, 211, 255, .45); animation: sim-pulse 2.2s ease-in-out infinite; }
+  @keyframes sim-pulse { 50% { box-shadow: 0 0 0 12px rgba(34, 211, 255, .04), 0 0 40px rgba(34, 211, 255, .6); } }
+  .sim-camera button { background: rgba(255,255,255,.05); border-color: var(--line); color: var(--ink); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 12px; transition: border-color .2s, box-shadow .2s; }
+  .sim-camera button:hover:not(:disabled) { border-color: var(--cyan); box-shadow: 0 0 18px rgba(34, 211, 255, .35); }
+  .sim-phone { background: linear-gradient(160deg, rgba(34, 211, 255, .1), rgba(139, 92, 246, .06) 60%, rgba(255,255,255,.02)); border-color: rgba(34, 211, 255, .3); box-shadow: 0 0 40px rgba(34, 211, 255, .1), 0 20px 50px rgba(0,0,0,.4); border-radius: 30px; }
+  .sim-phone-body { background: rgba(5, 9, 20, .72); border: 1px solid var(--line); }
+  .sim-message { background: rgba(34, 211, 255, .07); border-color: rgba(34, 211, 255, .3); }
+  .sim-user-message { background: rgba(61, 220, 151, .1); }
+  .sim-reply-button { background: rgba(34, 211, 255, .06); border-color: rgba(34, 211, 255, .4); border-radius: 12px; transition: background-color .2s, box-shadow .2s; }
+  .sim-reply-button:hover { background: rgba(34, 211, 255, .16); box-shadow: 0 0 18px rgba(34, 211, 255, .3); }
+  .sim-actions .primary-button { background: rgba(34, 211, 255, .1); color: var(--ink); border-color: rgba(34, 211, 255, .55); }
+  .sim-actions .primary-button:hover { background: rgba(34, 211, 255, .2); }
+
+  /* Pressure timer on the phone */
+  .sim-timer { display: flex; align-items: center; gap: 14px; margin: 14px 0 6px; padding: 12px 14px; border: 1px solid rgba(255, 77, 109, .45); border-radius: 16px; background: rgba(255, 77, 109, .07); }
+  .sim-timer[data-expired="true"] { border-color: var(--high); background: rgba(255, 77, 109, .14); }
+  .sim-timer-ring { flex: none; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--high) calc(var(--p) * 1%), rgba(255,255,255,.1) 0); position: relative; box-shadow: 0 0 16px rgba(255, 77, 109, .35); }
+  .sim-timer-ring::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: #0a101f; }
+  .sim-timer-clock { position: relative; font: 700 13px var(--mono); color: var(--high); }
+  .sim-timer { --p: 100; }
+  .sim-timer-copy strong { display: block; font-size: 13px; line-height: 1.35; }
+  .sim-timer-copy small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+  .sim-timer-note { margin: 8px 0 0; padding: 9px 12px; border-left: 2px solid var(--cyan); background: rgba(34, 211, 255, .06); font-size: 12px !important; color: var(--muted); border-radius: 0 10px 10px 0; }
+
+  /* X-ray labels around the phone */
+  .sim-xray-toggle { position: absolute; top: 18px; right: 20px; z-index: 4; padding: 9px 14px; border-radius: 13px; font-size: 12px; font-weight: 600; color: var(--muted); background: rgba(255,255,255,.05); border: 1px solid var(--line); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .sim-xray-toggle[aria-pressed="true"] { color: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 20px rgba(34, 211, 255, .3); }
+  .sim-xray { position: absolute; left: var(--phone-x, 50%); top: var(--phone-y, 50%); width: 0; height: 0; z-index: 3; pointer-events: none; }
+  .sim-xray::before { content: ""; position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--cyan); box-shadow: 0 0 20px var(--cyan), inset 0 0 14px rgba(34, 211, 255, .4); animation: sim-ring 2.4s ease-out infinite; }
+  @keyframes sim-ring { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+  .sim-xray-label { --c: var(--cyan); position: absolute; display: block; width: max-content; max-width: 230px; padding: 8px 12px; border-radius: 12px; font: 600 11px/1.4 var(--mono); letter-spacing: .03em; color: var(--c); background: rgba(5, 9, 20, .78); border: 1px solid var(--c); box-shadow: 0 0 18px color-mix(in srgb, var(--c) 40%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: sim-bob 5s ease-in-out infinite; }
+  .sim-xray-label[data-tone="high"] { --c: var(--high); }
+  .sim-xray-label[data-tone="mid"] { --c: var(--orange); }
+  .sim-xray-label b { display: block; margin-top: 2px; color: var(--ink); font: 600 12px Inter, sans-serif; overflow-wrap: anywhere; }
+  .sim-xray-label.pos-1 { left: -270px; top: -70px; }
+  .sim-xray-label.pos-2 { left: 50px; top: -40px; animation-delay: -1.6s; }
+  .sim-xray-label.pos-3 { left: -250px; top: 40px; animation-delay: -3.1s; }
+  @keyframes sim-bob { 50% { transform: translateY(-7px); } }
+
+  @media (max-width: 760px) {
+    .sim-xray { left: 0; top: auto; bottom: 66px; width: 100%; height: auto; display: flex; flex-direction: column; gap: 6px; padding: 0 12px; }
+    .sim-xray::before { display: none; }
+    .sim-xray-label, .sim-xray-label.pos-1, .sim-xray-label.pos-2, .sim-xray-label.pos-3 { position: static; max-width: none; width: auto; animation: none; }
+    .sim-xray-toggle { top: auto; bottom: 14px; right: 14px; }
+  }
   @media (max-width: 760px) {
     #cyber-net, .cyber-scan { display: none; }
     .cyber-radar { opacity: .5; }
     .main-links { border-radius: 18px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .cyber-scan, .cr-spin1, .cr-spin2, .cr-spin3, .cr-sweep, .cr-blip, .cyber-ln, .hero-evidence .annotated-message::after { animation: none !important; }
+    #sim-hotspot, .sim-xray::before, .sim-xray-label, .cyber-scan, .cr-spin1, .cr-spin2, .cr-spin3, .cr-sweep, .cr-blip, .cyber-ln, .hero-evidence .annotated-message::after { animation: none !important; }
     .cr-blip { opacity: .6; }
   }
 }
