@@ -75,10 +75,24 @@ window.QalqanSimulationScene = (() => {
     return new Float32Array(vertices);
   }
   function create(canvas,{project,onAvailability}){
-    let gl,program,buffer,positionLoc,normalLoc,colorLoc,glowLoc,matrixLoc,timeLoc,count=0,frame=0,active=false,phase='notification',yaw=.57,pitch=.43,distance=11.8,drag=null,lost=false,last=0;
+    let gl,program,buffer,positionLoc,normalLoc,colorLoc,glowLoc,matrixLoc,timeLoc,count=0,frame=0,active=false,phase='notification',yaw=.57,pitch=.43,distance=11.8,drag=null,lost=false,last=0,pProgram=null,pBuffer=null,pPosLoc=0,pMatLoc=null,pTimeLoc=null,pScaleLoc=null,pCount=0;
     const reduced=matchMedia('(prefers-reduced-motion: reduce)');
     function shader(type,source){const s=gl.createShader(type);if(!s)throw Error('shader');gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){gl.deleteShader(s);throw Error('compile');}return s;}
     function upload(){const data=geometry(phase);count=data.length/10;gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);}
+    // Floating glowing motes ("data dust"). Purely decorative: skipped for reduced motion, fewer on small canvases.
+    function particles(){
+      try{
+        const vs=shader(gl.VERTEX_SHADER,'attribute vec4 a;uniform mat4 m;uniform float t;uniform float k;varying float s;void main(){s=a.w;float y=mod(a.y+t*(.10+.14*a.w),3.7)+.25;vec3 q=vec3(a.x+sin(t*.5+a.w*6.283)*.18,y,a.z+cos(t*.4+a.w*5.0)*.18);gl_Position=m*vec4(q,1.0);gl_PointSize=k*(1.2+2.2*a.w)/gl_Position.w;}');
+        const fs=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying float s;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.05,d);vec3 c=mix(vec3(.13,.83,1.),vec3(.55,.36,.96),step(.72,s));gl_FragColor=vec4(c*a,a);}');
+        pProgram=gl.createProgram();gl.attachShader(pProgram,vs);gl.attachShader(pProgram,fs);gl.linkProgram(pProgram);gl.deleteShader(vs);gl.deleteShader(fs);
+        if(!gl.getProgramParameter(pProgram,gl.LINK_STATUS))throw Error('link');
+        pPosLoc=gl.getAttribLocation(pProgram,'a');pMatLoc=gl.getUniformLocation(pProgram,'m');pTimeLoc=gl.getUniformLocation(pProgram,'t');pScaleLoc=gl.getUniformLocation(pProgram,'k');
+        let seed=7;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+        pCount=innerWidth<760?36:90;const data=new Float32Array(pCount*4);
+        for(let i=0;i<pCount;i++){data.set([(rand()-.5)*8,rand()*3.7,(rand()-.5)*6,rand()],i*4);}
+        pBuffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pBuffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+      }catch(_){pProgram=null;pCount=0;}
+    }
     function setup(){
       try{
         gl=canvas.getContext('webgl',{antialias:true});if(!gl)throw Error('webgl');
@@ -87,7 +101,7 @@ window.QalqanSimulationScene = (() => {
         program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);gl.deleteShader(vertex);gl.deleteShader(fragment);
         if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('link');
         buffer=gl.createBuffer();positionLoc=gl.getAttribLocation(program,'p');normalLoc=gl.getAttribLocation(program,'n');colorLoc=gl.getAttribLocation(program,'c');glowLoc=gl.getAttribLocation(program,'g');matrixLoc=gl.getUniformLocation(program,'m');timeLoc=gl.getUniformLocation(program,'t');
-        upload();lost=false;canvas.dataset.render='webgl';onAvailability(true);request();
+        particles();upload();lost=false;canvas.dataset.render='webgl';onAvailability(true);request();
       }catch(_){canvas.dataset.render='fallback';onAvailability(false);}
     }
     function draw(now){
@@ -103,6 +117,13 @@ window.QalqanSimulationScene = (() => {
       gl.uniform1f(timeLoc,animate?(now||0)/1000:0);
       const target=[0,1.35,0],eye=[Math.sin(yaw)*Math.cos(pitch)*distance,1.35+Math.sin(pitch)*distance,Math.cos(yaw)*Math.cos(pitch)*distance];
       const m=multiply(perspective(w/h),lookAt(eye,target));gl.uniformMatrix4fv(matrixLoc,false,m);gl.drawArrays(gl.TRIANGLES,0,count);
+      if(animate&&pProgram){
+        for(const loc of [positionLoc,normalLoc,colorLoc,glowLoc])gl.disableVertexAttribArray(loc);
+        gl.useProgram(pProgram);gl.bindBuffer(gl.ARRAY_BUFFER,pBuffer);gl.enableVertexAttribArray(pPosLoc);gl.vertexAttribPointer(pPosLoc,4,gl.FLOAT,false,16,0);
+        gl.uniformMatrix4fv(pMatLoc,false,m);gl.uniform1f(pTimeLoc,(now||0)/1000);gl.uniform1f(pScaleLoc,h*.034);
+        gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);gl.depthMask(false);gl.drawArrays(gl.POINTS,0,pCount);gl.depthMask(true);gl.disable(gl.BLEND);gl.disableVertexAttribArray(pPosLoc);
+        canvas.dataset.particles=String(pCount);
+      }else delete canvas.dataset.particles;
       const p=[1.34,2.25,.9,1],q=[0,0,0,0];for(let row=0;row<4;row++)for(let col=0;col<4;col++)q[row]+=m[col*4+row]*p[col];
       project({x:clamp((q[0]/q[3]+1)*50,8,92),y:clamp((1-q[1]/q[3])*50,15,85)});
       if(animate)request();

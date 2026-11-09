@@ -19,6 +19,8 @@ def main():
         # The neon room is animated while visible: pixels change without any interaction.
         canvas = page.locator('#sim-canvas'); first = canvas.screenshot(); page.wait_for_timeout(700)
         assert canvas.screenshot() != first, 'room should animate when motion is allowed'
+        particles = int(canvas.get_attribute('data-particles') or 0)
+        assert particles >= 36, 'glowing motes should float when motion is allowed'
 
         page.locator('#sim-hotspot').click()
         timer = page.locator('.sim-timer')
@@ -71,9 +73,10 @@ def main():
         expect(quiet.locator('#sim-canvas')).to_have_attribute('data-render', 'webgl')
         c2 = quiet.locator('#sim-canvas'); a = c2.screenshot(); quiet.wait_for_timeout(700)
         assert c2.screenshot() == a, 'room must be static with reduced motion'
+        assert c2.get_attribute('data-particles') is None, 'no particles with reduced motion'
         assert not errors, errors
         browser.close()
-    print('Simulator FX passed: pressure timer, real X-ray labels, no timer for ordinary story, KK, animation and reduced motion.')
+    print('Simulator FX passed: pressure timer, real X-ray labels, no timer for ordinary story, KK, animation, particles and reduced motion.')
 
 
 if __name__ == '__main__':
