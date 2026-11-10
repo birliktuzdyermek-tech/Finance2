@@ -206,3 +206,8 @@ test('every story with pressure has positive whole minutes and the others have n
 test('only the bank call is presented as a phone call',()=>{
   assert.deepEqual(S.stories.filter(s=>s.call).map(s=>s.id),['bank-call']);
 });
+
+test('every story names its own 3D place in both languages',()=>{
+  assert.equal(new Set(S.stories.map(s=>s.place.ru)).size,S.stories.length);
+  for(const s of S.stories){assert.ok(s.place.ru&&s.place.kk,s.id);}
+});
