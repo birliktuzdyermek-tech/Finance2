@@ -17,6 +17,20 @@ def main():
         page.goto(BASE + '/#simulator', wait_until='networkidle')
         expect(page.locator('.sim-story')).to_have_count(8)
         expect(page.locator('.sim-new')).to_have_count(5)
+        # Every situation has its own 3D scene: the scene id follows the story and the picture differs.
+        import hashlib
+        ALL = ['blocked-card', 'safe-transfer', 'ordinary-receipt', 'qr-parking', 'relative-transfer', 'bank-call', 'marketplace-prepay', 'fake-job']
+        shots = {}
+        for sid in ALL:
+            page.locator(f'[data-story="{sid}"]').click()
+            expect(page.locator('#sim-canvas')).to_have_attribute('data-scene', sid)
+            page.wait_for_timeout(250)
+            shots[sid] = hashlib.sha1(page.locator('#sim-canvas').screenshot()).hexdigest()
+        assert len(set(shots.values())) == 8, 'each story needs a visibly different scene'
+        page.locator('[data-story="qr-parking"]').click()
+        expect(page.locator('[data-sim-i18n="room"]')).to_have_text('Парковка')
+        page.locator('[data-language="kk"]').click(); expect(page.locator('[data-sim-i18n="room"]')).to_have_text('Тұрақ'); page.locator('[data-language="ru"]').click()
+        page.locator('[data-story="blocked-card"]').click()
         for story_id, score, has_page, direct, minutes in STORIES:
             page.locator(f'[data-story="{story_id}"]').click()
             expect(page.locator(f'[data-story="{story_id}"]')).to_have_attribute('aria-pressed', 'true')
@@ -86,7 +100,7 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
         assert not errors, errors
         browser.close()
-    print('Simulator stories passed: 5 new stories end to end, pages and direct asks, the call screen, timers, KK, storage and 390px.')
+    print('Simulator stories passed: 5 new stories end to end, a different 3D scene per story, pages and direct asks, the call screen, timers, KK, storage and 390px.')
 
 
 if __name__ == '__main__':
