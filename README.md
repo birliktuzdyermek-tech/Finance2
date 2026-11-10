@@ -145,7 +145,7 @@ python -m scripts.evaluate_browser
 - [Методика и техническое приложение](docs/research.md), [dataset card](ai/dataset/README.md).
 - [One-pager](presentation/one-pager.md), [резюме RU](presentation/summary-ru.md), [summary EN](presentation/summary-en.md).
 - [17 слайдов и заметки](presentation/deck.json), [выступление](presentation/pitch-script.md), [демо и вопросы жюри](presentation/demo-and-qa.md).
-- [Roadmap, бюджет, готовность](docs/roadmap.md), [проверки](docs/verification.md).
+- [Речь для жюри и ответы на вопросы](presentation/speech.md), [Roadmap, бюджет, готовность](docs/roadmap.md), [проверки](docs/verification.md).
 
 Чтобы получить PowerPoint и PDF-материалы, установите `pip install -r presentation/requirements.txt` и выполните `python presentation/build.py`. Они появятся в `artifacts/`.
 
