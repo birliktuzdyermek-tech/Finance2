@@ -194,18 +194,27 @@ function loadSample(key) {const s=samples[key];setChannel(s.channel);$('#content
 $$('[data-demo-text]').forEach(n=>{n.textContent=samples[n.dataset.demoText].text;});
 $$('[data-sample]').forEach(b=>b.addEventListener('click',()=>{if(busy)return;loadSample(b.dataset.sample);$('#content').focus();}));
 // More ready-made examples (frontend/samples.js): buttons follow the current mode and language.
+const sampleTags={ru:'RU',kk:'KZ',en:'EN',mix:'RU+KZ'};let sampleLang='all';
 function renderSamples(){
   const box=document.querySelector('.samples');if(!box||!window.QalqanSamples)return;
   const lang=I.language()==='kk'?'kk':'ru';
-  box.querySelectorAll('[data-sample-extra]').forEach(n=>n.remove());
+  box.querySelectorAll('[data-sample-extra],.sample-langs').forEach(n=>n.remove());
+  const filter=node('div',null,'sample-langs');filter.setAttribute('role','group');filter.setAttribute('aria-label',lang==='kk'?'Мысалдар тілі':'Язык примеров');
+  [['all',lang==='kk'?'Барлығы':'Все'],['ru','RU'],['kk','KZ'],['en','EN'],['mix','RU+KZ']].forEach(([value,text])=>{
+    const f=node('button',text);f.type='button';f.dataset.sampleFilter=value;f.setAttribute('aria-pressed',String(sampleLang===value));
+    f.addEventListener('click',()=>{sampleLang=value;$$('[data-sample-filter]').forEach(n=>n.setAttribute('aria-pressed',String(n===f)));syncSamples();});
+    filter.append(f);
+  });
+  box.querySelector('span')?.after(filter);
   window.QalqanSamples.list.forEach(item=>{
-    const b=node('button',item.label[lang]+' ↗');b.type='button';b.dataset.sample=item.key;b.dataset.sampleExtra='';b.dataset.sampleMode=item.mode;b.title=item.hint[lang];
+    const b=node('button',null);b.type='button';b.dataset.sample=item.key;b.dataset.sampleExtra='';b.dataset.sampleMode=item.mode;b.dataset.sampleLang=item.lang;b.title=item.hint[lang];
+    if(item.lang==='any')b.append(item.label[lang]+' ↗');else{const tag=node('span',null,'sample-lang');tag.textContent=sampleTags[item.lang];b.append(item.label[lang]+' ',tag,' ↗');}
     b.addEventListener('click',()=>{if(busy)return;setChannel(item.channel);$('#content').value=item.text;$('#content').dispatchEvent(new Event('input'));$('#content').focus();});
     box.append(b);
   });
   syncSamples();
 }
-function syncSamples(){$$('.samples [data-sample-mode]').forEach(b=>{b.hidden=b.dataset.sampleMode!==mode;});}
+function syncSamples(){$$('.samples [data-sample-mode]').forEach(b=>{b.hidden=b.dataset.sampleMode!==mode||(sampleLang!=='all'&&b.dataset.sampleLang!=='any'&&b.dataset.sampleLang!==sampleLang);});}
 renderSamples();
 $$('[data-demo]').forEach(b=>b.addEventListener('click',()=>{
   if(busy||authBusy)return;

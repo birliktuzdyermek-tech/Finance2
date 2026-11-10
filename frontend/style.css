@@ -129,6 +129,10 @@ textarea:focus-visible { outline-offset: -3px; }
 .samples { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin: 20px 0; }
 .samples span { color: var(--muted); font-size: 12px; margin-right: 2px; }
 .samples button { padding: 7px 12px; font-size: 12px; }
+.sample-langs { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; }
+.sample-langs button { padding: 5px 11px; font: 600 11px var(--mono); letter-spacing: .06em; }
+.sample-langs button[aria-pressed="true"] { color: var(--cyan); border-color: var(--cyan); background: rgba(34, 211, 255, .1); }
+.samples .sample-lang { margin-left: 3px; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); font: 600 10px var(--mono); letter-spacing: .06em; }
 .mobile-help { font-size: 12px; line-height: 1.8; color: var(--muted); margin: 14px 0; }
 .privacy-note { display: flex; align-items: flex-start; gap: 11px; color: var(--muted); font-size: 12px; margin-top: 20px; }
 .privacy-note p { margin: 0; }
