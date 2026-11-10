@@ -193,6 +193,20 @@ const samples={phishing:{channel:'sms',text:'Срочно! Ваш счёт бу�
 function loadSample(key) {const s=samples[key];setChannel(s.channel);$('#content').value=s.text;$('#content').dispatchEvent(new Event('input'));}
 $$('[data-demo-text]').forEach(n=>{n.textContent=samples[n.dataset.demoText].text;});
 $$('[data-sample]').forEach(b=>b.addEventListener('click',()=>{if(busy)return;loadSample(b.dataset.sample);$('#content').focus();}));
+// More ready-made examples (frontend/samples.js): buttons follow the current mode and language.
+function renderSamples(){
+  const box=document.querySelector('.samples');if(!box||!window.QalqanSamples)return;
+  const lang=I.language()==='kk'?'kk':'ru';
+  box.querySelectorAll('[data-sample-extra]').forEach(n=>n.remove());
+  window.QalqanSamples.list.forEach(item=>{
+    const b=node('button',item.label[lang]+' ↗');b.type='button';b.dataset.sample=item.key;b.dataset.sampleExtra='';b.dataset.sampleMode=item.mode;b.title=item.hint[lang];
+    b.addEventListener('click',()=>{if(busy)return;setChannel(item.channel);$('#content').value=item.text;$('#content').dispatchEvent(new Event('input'));$('#content').focus();});
+    box.append(b);
+  });
+  syncSamples();
+}
+function syncSamples(){$$('.samples [data-sample-mode]').forEach(b=>{b.hidden=b.dataset.sampleMode!==mode;});}
+renderSamples();
 $$('[data-demo]').forEach(b=>b.addEventListener('click',()=>{
   if(busy||authBusy)return;
   loadSample(b.dataset.demo);location.hash='analyzer';route();
@@ -242,8 +256,8 @@ function renderAnnotatedText(text,result){
 function printResult(r=activeResult){if(!r)return;if($('#report-preview').open)$('#report-preview').close();renderResult(r);location.hash='result';route();window.print();}
 $('#download-report').addEventListener('click',e=>{e.preventDefault();printResult();});
 $('#preview-download').addEventListener('click',e=>{e.preventDefault();printResult();});
-$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;$$('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));$('#dialogue-hint').hidden=mode!=='dialogue';setChannel(channel);}));
-$$('[data-language]').forEach(b=>b.addEventListener('click',()=>{I.set(b.dataset.language);$$('[data-language]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));setChannel(channel);actionPlan(incident,false);if(activeResult)renderResult(activeResult);if($('#report-preview').open){$('#report-preview').close();renderPreview();}route();}));
+$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;$$('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));$('#dialogue-hint').hidden=mode!=='dialogue';setChannel(channel);syncSamples();}));
+$$('[data-language]').forEach(b=>b.addEventListener('click',()=>{I.set(b.dataset.language);$$('[data-language]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));setChannel(channel);renderSamples();actionPlan(incident,false);if(activeResult)renderResult(activeResult);if($('#report-preview').open){$('#report-preview').close();renderPreview();}route();}));
 function setProjector(on){document.body.classList.toggle('projector-mode',on);$('#projector-exit').hidden=!on;$$('#result-projector,#presentation-projector,#scenario-projector,#trainer-projector').forEach(b=>b.setAttribute('aria-pressed',String(on)));if(on){closeNavigation();window.scrollTo(0,0);$('#projector-exit').focus();}}
 $('#result-projector').addEventListener('click',()=>setProjector(!document.body.classList.contains('projector-mode')));
 $('#presentation-projector').addEventListener('click',()=>setProjector(!document.body.classList.contains('projector-mode')));
